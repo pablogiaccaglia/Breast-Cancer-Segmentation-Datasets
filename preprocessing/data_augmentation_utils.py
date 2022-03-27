@@ -103,29 +103,14 @@ transformedImage = elastic_transform(im, alpha = 2000, sigma = 30, alpha_affine 
 # transformedImage2 = applyHistogramEqualization(img = im, cv2ColorIn = cv2.COLOR_RGB2GRAY, cv2ColorOut = cv2.COLOR_GRAY2RGB)
 
 # Display result
-plt.figure(figsize = (16, 14))
-plt.imshow(im, cmap = 'gray')
-plt.show()
-plt.imshow(equa, cmap = 'gray')
-plt.show()
-
 
 image = dicom_utils.getData("/Users/pablo/Desktop/nl2-project/ct.dcm")
 mask = dicom_utils.getData("/Users/pablo/Desktop/nl2-project/mask.dcm")
 
-print(image.shape, mask.shape)
 
-visualizeImageAndMask(image, mask, cmap=plt.cm.gray)
+augmented = aug.augment(image = image, mask = mask)
 
-padded = aug.padImageAndMask(image = image, mask = mask, min_height = 256, min_width = 256)
+visualizeImageAndMask(image = augmented['image'], mask = augmented['mask'], original_image = image, original_mask = mask, cmap = plt.cm.gray)
 
-image_padded = padded['image']
-mask_padded = padded['mask']
-
-print(image_padded.shape, mask_padded.shape)
-
-transposed = aug.transposeImageAndMask(image = image, mask = mask)
-
-flipped = aug.imageAndMaskHFlip(image = image, mask = mask)
 
 

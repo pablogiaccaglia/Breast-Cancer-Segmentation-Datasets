@@ -61,3 +61,25 @@ def randomContrast(image: np.ndarray) -> dict:
     augmented = aug(image = image)
     return augmented
 
+
+def augment(image: np.ndarray, mask = np.ndarray) -> dict:
+
+    height, width = image.shape
+
+    aug = A.Compose([
+        A.OneOf([
+            A.RandomSizedCrop(min_max_height = (200, 200), height = height, width = width, p = 0.5),
+            A.PadIfNeeded(min_height = height, min_width = width, p = 0.5)
+        ], p = 1),
+        A.VerticalFlip(p = 0.5),
+        A.RandomRotate90(p = 0.5),
+        A.Transpose(p = 0.5),
+        A.RandomBrightnessContrast(p = 0.5, contrast_limit = 0, brightness_limit=0.1),
+        A.OneOf([
+            A.HorizontalFlip(p = 0.5),
+            A.VerticalFlip(p = 0.5)
+        ], p = 0.8)])
+
+    augmented = aug(image = image, mask = mask)
+
+    return augmented
