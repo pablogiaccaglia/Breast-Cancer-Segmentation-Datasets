@@ -105,7 +105,7 @@ transformedImage = elastic_transform(im, alpha = 2000, sigma = 30, alpha_affine 
 
 # Display result
 
-image = cv2.imread("/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Training-Preprocessed-IMG/Mass-Training_P_00041_LEFT_CC_FULL___PRE.png",
+image = cv2.imread("/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Training-Preprocessed-IMG/Mass-Training_P_00041_LEFT_CC_FULL___PRE.png",
                    -1)
 
 imageaug, maskaug = aug.augment(image = image, mask = image)

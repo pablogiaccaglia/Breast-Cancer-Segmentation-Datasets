@@ -151,7 +151,7 @@ def removeFiles(logger, filesToRemove):
         os.remove(f)
 
 
-def main():
+def handleMultiTumor(csv_path, abnormality_col, img_path, masks_path, extension, output_path):
     """main function for imagePreprocessing module.
     This function takes a path of the raw image folder,
     iterates through each image and executes the necessary
@@ -168,14 +168,6 @@ def main():
         command line arguments. These can be used for
         overwriting command line arguments as needed.
     """
-
-    csv_path = "/CBIS/mass_case_description_train_set_UPDATED.csv"
-
-    abnormality_col = "abnormality_id"
-    img_path = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Training-Preprocessed-IMG"
-    masks_path = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Training-Preprocessed-MSK"
-    extension = ".png"
-    output_path = "/Users/pablo/Desktop/nl2-project/CBIS/test"
 
     multi_tumour_set = findMultiTumour(
             logger = None,
@@ -201,8 +193,12 @@ def main():
             save_path = os.path.join(
                     output_path, ("_".join(["Mass-Training", k, "MASK___PRE.png"]))
             )
+        elif "test" in img_path.lower():
+            save_path = os.path.join(
+                    output_path, ("_".join(["Mass-Test", k, "MASK___PRE.png"]))
+            )
 
-            cv2.imwrite(save_path, summed_mask)
+        cv2.imwrite(save_path, summed_mask)
 
         removeFiles(logger = None, filesToRemove = v)
 
@@ -212,7 +208,3 @@ def main():
     print()
 
     return
-
-
-if __name__ == '__main__':
-    main()

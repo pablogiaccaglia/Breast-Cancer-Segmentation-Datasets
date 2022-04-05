@@ -544,9 +544,9 @@ print(ds)
 
     """
     mass_csv_path = "/Users/pablo/Desktop/nl2-project/CBIS/mass_case_description_train_set.csv"
-    mass_png_folder = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Training-Preprocessed-IMG"
+    mass_png_folder = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Training-Preprocessed-IMG"
     output_csv_path = "/CBIS/mass_case_description_train_set_UPDATED.csv"
-    masks_folder = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Training-Preprocessed-MSK"
+    masks_folder = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Training-Preprocessed-MSK"
 
     updateCSV(logger = None, mass_csv_path = mass_csv_path, mass_png_folder = mass_png_folder,
               masks_folder = masks_folder,

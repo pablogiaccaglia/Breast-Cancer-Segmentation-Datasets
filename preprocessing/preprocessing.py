@@ -1,10 +1,14 @@
 import os
+from distutils.dir_util import copy_tree
 from typing import Union
 
 import cv2
 import numpy as np
 import albumentations as A
 import pydicom
+
+from CBIS.refactor import updateCSV
+from CBIS import handle_multi_tumor
 
 
 def cropBorders(logger, img,
@@ -374,8 +378,8 @@ def pad(img: np.ndarray, logger = None) -> np.ndarray:
                 targetShape = (nCols, nCols)
 
             # pad.
-            padded_img = np.zeros(shape = targetShape)
-            padded_img[:nRows, :nCols] = img
+            paddedImg = np.zeros(shape = targetShape)
+            paddedImg[:nRows, :nCols] = img
 
     except Exception as e:
         # logger.error(f'Unable to pad!\n{e}')
@@ -528,7 +532,7 @@ def maskPreprocess(logger, mask: np.ndarray, toLRFlip: bool) -> np.ndarray:
         mask = makeLRFlip(logger, img = mask)
 
     # Step 3: Pad.
-    maskPreprocessed = pad(logger, img = mask)
+    maskPreprocessed = pad(logger = logger, img = mask)
 
     # Step 4: Downsample.
 
@@ -705,7 +709,73 @@ def CBISPreprocessing(logger, imagesPath: str, outputImagesPath: str, outputMask
     return
 
 
+def __CBISParametricRoutine(dcmFolder: str,
+                            originalPreprocessedIMGFolderPath: str,
+                            originalPreprocessedMSKFolderPath: str,
+                            originalCSVPath: str,
+                            updatedCSVPath: str,
+                            completePreprocessedIMGFolderPath: str,
+                            completePreprocessedMSKFolderPath: str,
+                            abnormality_col: str,
+                            extension: str) -> None:
+    CBISPreprocessing(logger = None, imagesPath = dcmFolder,
+                      outputImagesPath = originalPreprocessedIMGFolderPath,
+                      outputMasksPath = originalPreprocessedMSKFolderPath)
+
+    updateCSV(logger = None, mass_csv_path = originalCSVPath,
+              mass_png_folder = originalPreprocessedIMGFolderPath,
+              masks_folder = originalPreprocessedMSKFolderPath,
+              output_csv_path = updatedCSVPath)
+
+    handle_multi_tumor.handleMultiTumor(csv_path = updatedCSVPath,
+                                        abnormality_col = abnormality_col,
+                                        img_path = originalPreprocessedIMGFolderPath,
+                                        masks_path = originalPreprocessedMSKFolderPath,
+                                        output_path = originalPreprocessedMSKFolderPath,
+                                        extension = extension)
+
+    copy_tree(originalPreprocessedIMGFolderPath, completePreprocessedIMGFolderPath)
+    copy_tree(originalPreprocessedMSKFolderPath, completePreprocessedMSKFolderPath)
+
+
+def CBISFullRoutine():
+    originalTrainingPreprocessedIMGFolderPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Training-Preprocessed-IMG"
+    originalTrainingPreprocessedMSKFolderPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Training-Preprocessed-MSK"
+    originalTrainingCSVPath = "/Users/pablo/Desktop/nl2-project/CBIS/mass_case_description_train_set.csv"
+    updatedTrainingCSVPath = "/Users/pablo/Desktop/nl2-project/CBIS/mass_case_description_train_set_UPDATED.csv"
+
+    originalTestingPreprocessedIMGFolderPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Testing-Preprocessed-IMG"
+    originalTestingPreprocessedMSKFolderPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Testing-Preprocessed-MSK"
+    originalTestingCSVPath = "/Users/pablo/Desktop/nl2-project/CBIS/mass_case_description_test_set.csv"
+    updatedTestingCSVPath = "/Users/pablo/Desktop/nl2-project/CBIS/mass_case_description_test_set_UPDATED.csv"
+
+    completePreprocessedIMGFolderPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Preprocessed-Complete-IMG"
+    completePreprocessedMSKFolderPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Preprocessed-Complete-MSK"
+
+    abnormality_col = "abnormality_id"
+    extension = ".png"
+    output_path = "/Users/pablo/Desktop/nl2-project/CBIS/test1"
+
+    __CBISParametricRoutine(dcmFolder = "/Users/pablo/Desktop/CBIS-Training",
+                            originalPreprocessedIMGFolderPath = originalTrainingPreprocessedIMGFolderPath,
+                            originalPreprocessedMSKFolderPath = originalTrainingPreprocessedMSKFolderPath,
+                            originalCSVPath = originalTrainingCSVPath,
+                            updatedCSVPath = updatedTrainingCSVPath,
+                            completePreprocessedIMGFolderPath = completePreprocessedIMGFolderPath,
+                            completePreprocessedMSKFolderPath = completePreprocessedMSKFolderPath,
+                            abnormality_col = abnormality_col,
+                            extension = extension)
+
+    __CBISParametricRoutine(dcmFolder = "/Users/pablo/Desktop/CBIS-Testing"
+                            , originalPreprocessedIMGFolderPath = originalTestingPreprocessedIMGFolderPath,
+                            originalPreprocessedMSKFolderPath = originalTestingPreprocessedMSKFolderPath,
+                            originalCSVPath = originalTestingCSVPath,
+                            updatedCSVPath = updatedTestingCSVPath,
+                            completePreprocessedIMGFolderPath = completePreprocessedIMGFolderPath,
+                            completePreprocessedMSKFolderPath = completePreprocessedMSKFolderPath,
+                            abnormality_col = abnormality_col,
+                            extension = extension)
+
+
 if __name__ == '__main__':
-    CBISPreprocessing(logger = None, imagesPath = "/Users/pablo/Desktop/CBIS-Training",
-                      outputImagesPath = "/Users/pablo/Desktop/CBIS-Training-Preprocessed-IMG",
-                      outputMasksPath = "/Users/pablo/Desktop/CBIS-Training-Preprocessed-MSK")
+    CBISFullRoutine()

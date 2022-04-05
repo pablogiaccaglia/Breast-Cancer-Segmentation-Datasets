@@ -19,7 +19,7 @@ from keras.callbacks import ModelCheckpoint
 from keras import backend as K
 from keras import optimizers
 import matplotlib.pyplot as plt
-import utils
+from preprocessing import utils
 import tensorflow as tf
 
 tf.random.set_seed(
@@ -41,8 +41,6 @@ tf.compat.v1.keras.backend.set_session(sess)
 img_rows = 256
 img_cols = 256
 smooth = 1.
-
-
 
 
 def dice_coef(y_true, y_pred):

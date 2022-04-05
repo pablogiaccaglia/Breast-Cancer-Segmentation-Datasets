@@ -447,8 +447,8 @@ def makeFinalDataset(imagesDir: str,
 
 
 def routineMakeFinalDataset():
-    imagesPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Training-Preprocessed-IMG/"
-    masksPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Training-Preprocessed-MSK/"
+    imagesPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Training-Preprocessed-IMG/"
+    masksPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Training-Preprocessed-MSK/"
     trainingImgDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Training-Final-IMG/"
     trainingMaskDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Training-Final-MSK/"
     validationImgDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Validation-Final-IMG/"
