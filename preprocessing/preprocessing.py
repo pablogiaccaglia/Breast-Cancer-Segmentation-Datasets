@@ -1,8 +1,10 @@
+import os
 from typing import Union
 
 import cv2
 import numpy as np
 import albumentations as A
+import pydicom
 
 
 def cropBorders(logger, img,
@@ -69,7 +71,8 @@ def minMaxNormalize(logger, img: np.ndarray) -> np.ndarray:
 
     return normalizedImg
 
-def globalBinarize(logger, img: np.ndarray, thresh, maxval: np.uint8) -> np.ndarray:
+
+def globalBinarize(logger, img: np.ndarray, thresh, maxval: float) -> np.ndarray:
     """
     This function takes in a numpy array image and
     returns a corresponding mask that is a global
@@ -104,7 +107,8 @@ def globalBinarize(logger, img: np.ndarray, thresh, maxval: np.uint8) -> np.ndar
 
     return binarizedImage
 
-def editMask(logger, mask: np.ndarray, ksize: tuple = (23, 23), operation: str = "open") -> np.ndarray:
+
+def editMask(logger, mask: np.ndarray, ksize: tuple, operation: str = "open") -> np.ndarray:
     """
     This function edits a given mask (binary image) by performing
     closing then opening morphological operations.
@@ -142,6 +146,7 @@ def editMask(logger, mask: np.ndarray, ksize: tuple = (23, 23), operation: str =
         print(f"Unable to get editMask!\n{e}")
 
     return editedMask
+
 
 def sortContoursByArea(logger = None, contours: list = None, reverse = True) -> tuple:
     """
@@ -182,6 +187,7 @@ def sortContoursByArea(logger = None, contours: list = None, reverse = True) -> 
         print(f"Unable to get sortContourByArea!\n{e}")
 
     return sortedContours, boundingBoxes
+
 
 def selectXLargestBlobs(logger, mask: np.ndarray, topXContours: int = None, reverse: bool = True) -> tuple:
     """
@@ -228,8 +234,8 @@ def selectXLargestBlobs(logger, mask: np.ndarray, topXContours: int = None, reve
 
             # Sort contours based on contour area.
             sortedContours, boundingBoxes = sortContoursByArea(logger = None,
-                                                                contours = contours, reverse = reverse
-                                                                )
+                                                               contours = contours, reverse = reverse
+                                                               )
 
             # Get the topDirectory X largest contours.
             XLargestContours = sortedContours[0:topXContours]
@@ -252,15 +258,15 @@ def selectXLargestBlobs(logger, mask: np.ndarray, topXContours: int = None, reve
 
     return numOfContours, xLargestBlobs
 
-def applyMask(logger, img: np.ndarray, mask: np.ndarray) -> np.ndarray:
 
+def applyMask(logger, img: np.ndarray, mask: np.ndarray) -> np.ndarray:
     maskedImage = img.copy()
     maskedImage[mask == 0] = 0
 
     return maskedImage
 
-def checkLRFlip(logger, mask: np.ndarray) -> bool:
 
+def checkLRFlip(logger, mask: np.ndarray) -> bool:
     """
     This function checks whether or not an image needs to be
     flipped horizontally (i.e. left-right flip). The correct
@@ -287,7 +293,7 @@ def checkLRFlip(logger, mask: np.ndarray) -> bool:
         # yCenter = nRows // 2
 
         # Sum down each column.
-        colSum = mask.sum(axis=0)
+        colSum = mask.sum(axis = 0)
 
         # Sum across each row.
         # rowSum = mask.sum(axis=1)
@@ -306,8 +312,8 @@ def checkLRFlip(logger, mask: np.ndarray) -> bool:
 
     return toFlip
 
-def makeLRFlip(logger, img: np.ndarray) -> np.ndarray:
 
+def makeLRFlip(logger, img: np.ndarray) -> np.ndarray:
     """
     This function flips a given image horizontally (i.e. left-right).
     Parameters
@@ -330,8 +336,8 @@ def makeLRFlip(logger, img: np.ndarray) -> np.ndarray:
 
     return flippedImage
 
-def pad(logger, img: np.ndarray) -> np.ndarray:
 
+def pad(img: np.ndarray, logger = None) -> np.ndarray:
     """
     This function pads a given image with black pixels,
     along its shorter side, into a square and returns
@@ -368,7 +374,7 @@ def pad(logger, img: np.ndarray) -> np.ndarray:
                 targetShape = (nCols, nCols)
 
             # pad.
-            padded_img = np.zeros(shape= targetShape)
+            padded_img = np.zeros(shape = targetShape)
             padded_img[:nRows, :nCols] = img
 
     except Exception as e:
@@ -377,8 +383,8 @@ def pad(logger, img: np.ndarray) -> np.ndarray:
 
     return paddedImg
 
-def CLAHE(logger, image: np.ndarray) -> dict:
 
+def CLAHE(logger, image: np.ndarray) -> dict:
     augmented = image
 
     try:
@@ -392,20 +398,19 @@ def CLAHE(logger, image: np.ndarray) -> dict:
 
 
 def fullMammoPreprocess(
-    logger,
-    img: np.ndarray,
-    left : Union[float, int],
-    right : Union[float, int],
-    down : Union[float, int],
-    up : Union[float, int],
-    thresh,
-    maxval: np.uint8,
-    ksize: tuple,
-    operation: str,
-    reverse: bool,
-    topXContours: int
-):
-
+        logger,
+        img: np.ndarray,
+        left: Union[float, int],
+        right: Union[float, int],
+        down: Union[float, int],
+        up: Union[float, int],
+        thresh,
+        maxval: float,
+        ksize: np.uint8,
+        operation: str,
+        reverse: bool,
+        topXContours: int
+) -> tuple:
     """
     This function chains and executes all the preprocessing
     steps for a full mammogram, in the following order:
@@ -434,47 +439,49 @@ def fullMammoPreprocess(
 
     try:
         # Step 1: Initial crop.
-        croppedImage = cropBorders(logger = logger, img=img, left=left, right=right, down=down, up=up)
+        croppedImage = cropBorders(logger = logger, img = img, left = left, right = right, down = down, up = up)
         # cv2.imwrite("../data/preprocessed/Mass/testing/cropped.png", croppedImage)
 
         # Step 2: Min-max normalize.
-        normalizedImage = minMaxNormalize(logger = logger, img=croppedImage)
+        normalizedImage = minMaxNormalize(logger = logger, img = croppedImage)
         # cv2.imwrite("../data/preprocessed/Mass/testing/normed.png", normalizedImage)
 
         # Step 3: Remove artefacts.
-        binarizedImage = globalBinarize(logger = logger, img=normalizedImage, thresh=thresh, maxval=maxval)
+        binarizedImage = globalBinarize(logger = logger, img = normalizedImage, thresh = thresh, maxval = maxval)
         editedMask = editMask(
-                logger = logger, mask=binarizedImage, ksize=(ksize, ksize), operation=operation
+                logger = logger, mask = binarizedImage, ksize = (ksize, ksize), operation = operation
         )
-        _, xLargestMasks = selectXLargestBlobs(logger = logger, mask=editedMask, topXContours =topXContours, reverse=reverse)
+        _, xLargestMasks = selectXLargestBlobs(logger = logger, mask = editedMask, topXContours = topXContours,
+                                               reverse = reverse)
         # cv2.imwrite(
         # "../data/preprocessed/Mass/testing/xLargest_mask.png", xLargestMasks
         # )
-        maskedImage = applyMask(logger = logger, img=normalizedImage, mask=xLargestMasks)
+        maskedImage = applyMask(logger = logger, img = normalizedImage, mask = xLargestMasks)
         # cv2.imwrite("../data/preprocessed/Mass/testing/maskedImage.png", maskedImage)
 
         # Step 4: Horizontal flip.
-        toLRFlip = checkLRFlip(logger = logger, mask=xLargestMasks)
+        toLRFlip = checkLRFlip(logger = logger, mask = xLargestMasks)
 
         if toLRFlip:
-            flippedImage = makeLRFlip(logger = logger, img=maskedImage)
+            flippedImage = makeLRFlip(logger = logger, img = maskedImage)
         elif not toLRFlip:
             flippedImage = maskedImage
         # cv2.imwrite("../data/preprocessed/Mass/testing/flippedImage.png", flippedImage)
 
         # Step 5: CLAHE enhancement.
-        claheImage = CLAHE(logger = logger, image=flippedImage)['image']
+        # claheImage = CLAHE(logger = logger, image=flippedImage)['image']
+        claheImage = flippedImage
         # cv2.imwrite("../data/preprocessed/Mass/testing/claheImage.png", claheImage)
 
         # Step 6: pad.
-        paddedImage = pad(logger = logger, img=claheImage)
+        paddedImage = pad(logger = logger, img = claheImage)
         paddedImage = cv2.normalize(
-            paddedImage,
-            None,
-            alpha=0,
-            beta=255,
-            norm_type=cv2.NORM_MINMAX,
-            dtype=cv2.CV_32F,
+                paddedImage,
+                None,
+                alpha = 0,
+                beta = 255,
+                norm_type = cv2.NORM_MINMAX,
+                dtype = cv2.CV_32F,
         )
         # cv2.imwrite("../data/preprocessed/Mass/testing/paddedImage.png", paddedImage)
 
@@ -482,7 +489,7 @@ def fullMammoPreprocess(
         # Not done yet.
 
         # Step 8: Min-max normalise.
-        imgPreprocessed = minMaxNormalize(logger = logger, img=paddedImage)
+        imgPreprocessed = minMaxNormalize(logger = logger, img = paddedImage)
         # cv2.imwrite("../data/preprocessed/Mass/testing/imgPreprocessed.png", imgPreprocessed)
 
     except Exception as e:
@@ -491,8 +498,8 @@ def fullMammoPreprocess(
 
     return imgPreprocessed, toLRFlip
 
-def maskPreprocess(logger, mask: np.ndarray, toLRFlip: bool) -> np.ndarray:
 
+def maskPreprocess(logger, mask: np.ndarray, toLRFlip: bool) -> np.ndarray:
     """
     This function chains and executes all the preprocessing
     steps necessary for a ROI mask image.
@@ -514,21 +521,21 @@ def maskPreprocess(logger, mask: np.ndarray, toLRFlip: bool) -> np.ndarray:
     """
 
     # Step 1: Initial crop.
-    mask = cropBorders(logger, img=mask)
+    mask = cropBorders(logger, img = mask)
 
     # Step 2: Horizontal flip.
     if toLRFlip:
-        mask = makeLRFlip(logger, img=mask)
+        mask = makeLRFlip(logger, img = mask)
 
     # Step 3: Pad.
-    maskPreprocessed = pad(logger, img=mask)
+    maskPreprocessed = pad(logger, img = mask)
 
     # Step 4: Downsample.
 
     return maskPreprocessed
 
-def sumMasks(logger, mask_list):
 
+def sumMasks(logger, mask_list):
     """
     This function sums a list of given masks.
     Parameters
@@ -551,7 +558,7 @@ def sumMasks(logger, mask_list):
         # Binarise (there might be some overlap, resulting in pixels with
         # values of 510, 765, etc...)
         _, summed_mask_bw = cv2.threshold(
-            src=summed_mask, thresh=1, maxval=255, type=cv2.THRESH_BINARY
+                src = summed_mask, thresh = 1, maxval = 255, type = cv2.THRESH_BINARY
         )
 
     except Exception as e:
@@ -559,3 +566,146 @@ def sumMasks(logger, mask_list):
         print((f"Unable to get findMultiTumour!\n{e}"))
 
     return
+
+
+def CBISPreprocessing(logger, imagesPath: str, outputImagesPath: str, outputMasksPath: str):
+    """main function for imagePreprocessing module.
+    This function takes a path of the raw image folder,
+    iterates through each image and executes the necessary
+    image preprocessing steps on each image, and saves
+    preprocessed images (in the specified file extension)
+    in the output paths specified. FULL and MASK images are
+    saved in their specified separate folders.
+
+    Parameters
+    ----------
+    logger : {logging.Logger}
+        The logger used for logging error information
+    """
+
+    # Get individual .dcm paths.
+    dcmPaths = []
+
+    for currentDirectory, dirs, files in os.walk(imagesPath):
+        files.sort()
+        for f in files:
+            if f.endswith(".dcm"):
+                dcmPaths.append(os.path.join(currentDirectory, f))
+
+    # Get paths of full mammograms and ROI masks.
+    fullMammPaths = [f for f in dcmPaths if ("FULL" in f)]
+    masksPaths = [f for f in dcmPaths if ("MASK" in f)]
+
+    count = 0
+    for fullMammPath in fullMammPaths:
+
+        # Read full mammogram .dcm file.
+        ds = pydicom.dcmread(fullMammPath)
+
+        # Get relevant metadata from .dcm file.
+        patientID = ds.PatientID
+
+        # Calc-Test masks do not have the "Calc-Test_" suffix
+        # when it was originally downloaded (masks from Calc-Train,
+        # Mass-Test and Mass-Train all have their corresponding suffices).
+        patientID = patientID.replace(".dcm", "")
+        patientID = patientID.replace("Calc-Test_", "")
+
+        fullMamm = ds.pixel_array
+
+        # =========================
+        # Preprocess Full Mammogram
+        # =========================
+
+        # Get all hyperparameters.
+        left = 0.01
+        right = 0.01
+        up = 0.04
+        down = 0.04
+        thresh = 0.1
+        maxValue = 1.0
+        i1 = np.uint8(23)
+        kSize = i1
+        operation = "open"
+        reverse = True
+        topXContours = 1
+        outputFormat = ".png"
+
+        # Preprocess full mammogram images.
+        fullMammPreprocessed, toLRFlip = fullMammoPreprocess(
+                logger = None,
+                img = fullMamm,
+                left = left,
+                right = right,
+                up = up,
+                down = down,
+                thresh = thresh,
+                maxval = maxValue,
+                ksize = kSize,
+                operation = operation,
+                reverse = reverse,
+                topXContours = topXContours
+        )
+
+        # Need to normalise to [0, 255] before saving as .png.
+        fullMammPreprocessedNormalized = cv2.normalize(
+                fullMammPreprocessed,
+                None,
+                alpha = 0,
+                beta = 255,
+                norm_type = cv2.NORM_MINMAX,
+                dtype = cv2.CV_32F,
+        )
+
+        # Save preprocessed full mammogram image.
+        savedFilename = (
+                os.path.basename(fullMammPath).replace(".dcm", "")
+                + "___PRE"
+                + outputFormat
+        )
+        savedFilePath = os.path.join(outputImagesPath, savedFilename)
+
+        cv2.imwrite(savedFilePath, fullMammPreprocessedNormalized)
+        # print(f"DONE FULL: {fullMammPath}")
+
+        # ================================
+        # Preprocess Corresponding Mask(s)
+        # ================================
+
+        # Get the path of corresponding ROI mask(s) .dcm file(s).
+        maskImagePath = [mp for mp in masksPaths if patientID in mp]
+
+        for mp in maskImagePath:
+            # Read mask(s) .dcm file(s).
+            maskDcm = pydicom.dcmread(mp)
+            maskArray = maskDcm.pixel_array
+
+            # Preprocess.
+            mask_pre = maskPreprocess(logger = None, mask = maskArray, toLRFlip = toLRFlip)
+
+            # Save preprocessed mask.
+            savedFilename = (
+                    os.path.basename(mp).replace(".dcm", "") + "___PRE" + outputFormat
+            )
+            savedFilePath = os.path.join(outputMasksPath, savedFilename)
+            cv2.imwrite(savedFilePath, mask_pre)
+
+        #  print(f"DONE MASK: {mp}")
+
+        count += 1
+
+        # if count == 1:
+        #     break
+
+    print(f"Total count = {count}")
+    print()
+    print("Getting out of imagePreprocessing module.")
+    print("-" * 30)
+
+    return
+
+
+if __name__ == '__main__':
+    CBISPreprocessing(logger = None, imagesPath = "/Users/pablo/Desktop/CBIS-Training",
+                      outputImagesPath = "/Users/pablo/Desktop/CBIS-Training-Preprocessed-IMG",
+                      outputMasksPath = "/Users/pablo/Desktop/CBIS-Training-Preprocessed-MSK")

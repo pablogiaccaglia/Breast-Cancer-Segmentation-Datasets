@@ -1,13 +1,10 @@
 # Import stuff
 import numpy as np
-import pandas as pd
 import cv2
 from scipy.ndimage.interpolation import map_coordinates
 from scipy.ndimage.filters import gaussian_filter
 import matplotlib.pyplot as plt
-import albumentations as A
-import dicom_utils
-import augmentation as aug
+
 
 # Function to distort image
 def elastic_transform(image, alpha, sigma, alpha_affine, random_state = None):
@@ -47,6 +44,7 @@ def elastic_transform(image, alpha, sigma, alpha_affine, random_state = None):
 
     return distored_image.reshape(shape)
 
+
 def visualizeImageAndMask(image, mask, original_image = None, original_mask = None, cmap = None):
     fontsize = 18
 
@@ -72,6 +70,7 @@ def visualizeImageAndMask(image, mask, original_image = None, original_mask = No
 
     plt.show()
 
+
 # Define function to draw a grid
 def draw_grid(im, grid_size):
     # Draw grid lines
@@ -79,6 +78,7 @@ def draw_grid(im, grid_size):
         cv2.line(im, (i, 0), (i, im.shape[0]), color = (255,))
     for j in range(0, im.shape[0], grid_size):
         cv2.line(im, (0, j), (im.shape[1], j), color = (255,))
+
 
 def applyHistogramEqualization(img, cv2ColorIn: int, cv2ColorOut: int):
     # since equalizeHist equalizes the histogram of a grayscale image, we need this color space conversion
@@ -89,7 +89,8 @@ def applyHistogramEqualization(img, cv2ColorIn: int, cv2ColorOut: int):
     img = cv2.cvtColor(grayImageEqualizedHistogram, cv2ColorOut)
     return img
 
-# Load images
+
+"""# Load images
 im = cv2.imread("lenna.jpeg", -1)
 
 equa = applyHistogramEqualization(im, cv2.COLOR_RGB2GRAY, cv2.COLOR_GRAY2RGB)
@@ -104,13 +105,10 @@ transformedImage = elastic_transform(im, alpha = 2000, sigma = 30, alpha_affine 
 
 # Display result
 
-image = dicom_utils.getData("/Users/pablo/Desktop/nl2-project/ct.dcm")
-mask = dicom_utils.getData("/Users/pablo/Desktop/nl2-project/mask.dcm")
+image = cv2.imread("/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Training-Preprocessed-IMG/Mass-Training_P_00041_LEFT_CC_FULL___PRE.png",
+                   -1)
 
+imageaug, maskaug = aug.augment(image = image, mask = image)
 
-augmented = aug.augment(image = image, mask = mask)
-
-visualizeImageAndMask(image = augmented['image'], mask = augmented['mask'], original_image = image, original_mask = mask, cmap = plt.cm.gray)
-
-
-
+visualizeImageAndMask(image = imageaug, mask = maskaug, original_image = image,
+                      original_mask = image, cmap = plt.cm.gray)"""

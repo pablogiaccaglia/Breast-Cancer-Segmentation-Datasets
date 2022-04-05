@@ -2,11 +2,7 @@ import random
 
 import numpy as np
 import albumentations as A
-
-def padImageAndMask(image: np.ndarray, mask: np.ndarray, min_height: int, min_width: int) -> dict:
-    aug = A.PadIfNeeded(min_height = min_height, min_width = min_width, p = 1)
-    augmented = aug(image = image, mask = mask)
-    return augmented
+import preprocessing
 
 def imageAndMaskHFlip(image: np.ndarray, mask: np.ndarray) -> dict:
     aug = A.HorizontalFlip(p = 1)
@@ -61,25 +57,30 @@ def randomContrast(image: np.ndarray) -> dict:
     augmented = aug(image = image)
     return augmented
 
+def augment(image: np.ndarray, mask: np.ndarray, targetSize: int = 256) -> tuple:
 
-def augment(image: np.ndarray, mask = np.ndarray) -> dict:
+    try:
+        height, width, c = image.shape
+    except:
+        height, width = image.shape
+    
+    image = image.astype(dtype = np.uint8)
 
-    height, width = image.shape
+    image = preprocessing.pad(img = image)
+    mask = preprocessing.pad(img = mask)
 
     aug = A.Compose([
-        A.OneOf([
-            A.RandomSizedCrop(min_max_height = (200, 200), height = height, width = width, p = 0.5),
-            A.PadIfNeeded(min_height = height, min_width = width, p = 0.5)
-        ], p = 1),
-        A.VerticalFlip(p = 0.5),
-        A.RandomRotate90(p = 0.5),
+        A.Crop(x_min = 0, y_min = 0, y_max = int(height*2/3), x_max = int(width*2/3), p = 0.4),
+        A.RandomRotate90(p = 0.8),
         A.Transpose(p = 0.5),
-        A.RandomBrightnessContrast(p = 0.5, contrast_limit = 0, brightness_limit=0.1),
+        A.RandomBrightnessContrast(p = 0.5, contrast_limit = 0.08, brightness_limit=0.08),
+        A.Resize(height = targetSize, width = targetSize),
         A.OneOf([
-            A.HorizontalFlip(p = 0.5),
-            A.VerticalFlip(p = 0.5)
+            A.HorizontalFlip(p = 0.8),
+            A.VerticalFlip(p = 0.8)
         ], p = 0.8)])
 
     augmented = aug(image = image, mask = mask)
 
-    return augmented
+    return augmented['image'], augmented['mask']
+
