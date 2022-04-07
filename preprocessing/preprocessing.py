@@ -1,4 +1,5 @@
 import os
+import string
 from distutils.dir_util import copy_tree
 from typing import Union
 
@@ -6,6 +7,7 @@ import cv2
 import numpy as np
 import albumentations as A
 import pydicom
+from skimage.exposure import equalize_adapthist
 
 from CBIS.refactor import updateCSV
 from CBIS import handle_multi_tumor
@@ -74,6 +76,15 @@ def minMaxNormalize(logger, img: np.ndarray) -> np.ndarray:
         print((f"Unable to get minMaxNormalise!\n{e}"))
 
     return normalizedImg
+
+
+def setBlackRegion(logger, img: np.ndarray, start: int, end: int) -> np.ndarray:
+
+    for i in range(img.shape[0]):
+        for j in range(int(start), end):
+            img[i][j] = 0
+
+    return img
 
 
 def globalBinarize(logger, img: np.ndarray, thresh, maxval: float) -> np.ndarray:
@@ -388,17 +399,15 @@ def pad(img: np.ndarray, logger = None) -> np.ndarray:
     return paddedImg
 
 
-def CLAHE(logger, image: np.ndarray) -> dict:
-    augmented = image
+def CLAHE(logger, image: np.ndarray) -> np.ndarray:
 
     try:
-        aug = A.CLAHE(p = 1)
-        augmented = aug(image = image)
+        image = equalize_adapthist(image)
     except Exception as e:
         # logger.error(f'Unable to apply CLAHE!\n{e}')
         print(f'Unable to apply CLAHE!\n{e}')
 
-    return augmented
+    return image
 
 
 def fullMammoPreprocess(
@@ -413,7 +422,9 @@ def fullMammoPreprocess(
         ksize: np.uint8,
         operation: str,
         reverse: bool,
-        topXContours: int
+        topXContours: int,
+        mode: str,
+        mammMask: np.ndarray = None,
 ) -> tuple:
     """
     This function chains and executes all the preprocessing
@@ -442,6 +453,11 @@ def fullMammoPreprocess(
     imgPreprocessed, toLRFlip = img, False
 
     try:
+
+        if mode == 'csaw':
+            binarizedMask = globalBinarize(logger = logger, img = mammMask, thresh = thresh, maxval = maxval)
+            img = applyMask(logger = logger, img = img, mask = binarizedMask)
+
         # Step 1: Initial crop.
         croppedImage = cropBorders(logger = logger, img = img, left = left, right = right, down = down, up = up)
         # cv2.imwrite("../data/preprocessed/Mass/testing/cropped.png", croppedImage)
@@ -450,21 +466,26 @@ def fullMammoPreprocess(
         normalizedImage = minMaxNormalize(logger = logger, img = croppedImage)
         # cv2.imwrite("../data/preprocessed/Mass/testing/normed.png", normalizedImage)
 
-        # Step 3: Remove artefacts.
-        binarizedImage = globalBinarize(logger = logger, img = normalizedImage, thresh = thresh, maxval = maxval)
-        editedMask = editMask(
-                logger = logger, mask = binarizedImage, ksize = (ksize, ksize), operation = operation
-        )
-        _, xLargestMasks = selectXLargestBlobs(logger = logger, mask = editedMask, topXContours = topXContours,
-                                               reverse = reverse)
-        # cv2.imwrite(
-        # "../data/preprocessed/Mass/testing/xLargest_mask.png", xLargestMasks
-        # )
-        maskedImage = applyMask(logger = logger, img = normalizedImage, mask = xLargestMasks)
-        # cv2.imwrite("../data/preprocessed/Mass/testing/maskedImage.png", maskedImage)
+        if mode == 'cbis':
+            # Step 3: Remove artefacts.
+            binarizedImage = globalBinarize(logger = logger, img = normalizedImage, thresh = thresh, maxval = maxval)
+            editedMask = editMask(
+                    logger = logger, mask = binarizedImage, ksize = (ksize, ksize), operation = operation
+            )
+            _, xLargestMask = selectXLargestBlobs(logger = logger, mask = editedMask, topXContours = topXContours,
+                                                   reverse = reverse)
+            # cv2.imwrite(
+            # "../data/preprocessed/Mass/testing/xLargest_mask.png", xLargestMask
+            # )
+            maskedImage = applyMask(logger = logger, img = normalizedImage, mask = xLargestMask)
+            # cv2.imwrite("../data/preprocessed/Mass/testing/maskedImage.png", maskedImage)
+
+        else:
+            xLargestMask = img
+            maskedImage = img
 
         # Step 4: Horizontal flip.
-        toLRFlip = checkLRFlip(logger = logger, mask = xLargestMasks)
+        toLRFlip = checkLRFlip(logger = logger, mask = xLargestMask)
 
         if toLRFlip:
             flippedImage = makeLRFlip(logger = logger, img = maskedImage)
@@ -473,8 +494,10 @@ def fullMammoPreprocess(
         # cv2.imwrite("../data/preprocessed/Mass/testing/flippedImage.png", flippedImage)
 
         # Step 5: CLAHE enhancement.
-        # claheImage = CLAHE(logger = logger, image=flippedImage)['image']
-        claheImage = flippedImage
+        if mode == 'cbis':
+            claheImage = CLAHE(logger = logger, image=flippedImage)
+        else:
+            claheImage = flippedImage
         # cv2.imwrite("../data/preprocessed/Mass/testing/claheImage.png", claheImage)
 
         # Step 6: pad.
@@ -602,7 +625,6 @@ def CBISPreprocessing(logger, imagesPath: str, outputImagesPath: str, outputMask
 
     count = 0
     for fullMammPath in fullMammPaths:
-
         # Read full mammogram .dcm file.
         ds = pydicom.dcmread(fullMammPath)
 
@@ -648,7 +670,8 @@ def CBISPreprocessing(logger, imagesPath: str, outputImagesPath: str, outputMask
                 ksize = kSize,
                 operation = operation,
                 reverse = reverse,
-                topXContours = topXContours
+                topXContours = topXContours,
+                mode = 'cbis'
         )
 
         # Need to normalise to [0, 255] before saving as .png.
@@ -709,6 +732,134 @@ def CBISPreprocessing(logger, imagesPath: str, outputImagesPath: str, outputMask
     return
 
 
+def getListOfFiles(dirPath: str, extension: str) -> list:
+
+    listOfPaths = []
+
+    for currentDirectory, dirs, files in os.walk(dirPath):
+        files.sort()
+        for f in files:
+            if f.endswith(extension):
+                listOfPaths.append(os.path.join(currentDirectory, f))
+
+    return listOfPaths
+
+
+def CSAWPreprocessing(logger, imagesPath: str, masksPath: str, mammGlandMasksPath: str, outputImagesPath: str, outputMasksPath: str):
+
+    imagesPaths = getListOfFiles(dirPath = imagesPath, extension = ".png")
+    masksPaths = getListOfFiles(dirPath =masksPath, extension = ".png")
+    mammGlandsPaths = getListOfFiles(dirPath = mammGlandMasksPath, extension = ".png")
+
+    count = 0
+
+    masksPaths.sort()
+    imagesPaths.sort()
+    mammGlandsPaths.sort()
+
+    for fullMammPath in imagesPaths:
+        # Read full mammogram .png file.
+        fullMamm = cv2.imread(fullMammPath, cv2.IMREAD_GRAYSCALE)
+
+        mammID = fullMammPath.split('-')[-1]
+
+        mammGlandMaskPath = [p for p in mammGlandsPaths if p.split('-')[-1] == mammID][0]
+
+        mammGlandMask = cv2.imread(mammGlandMaskPath, cv2.IMREAD_GRAYSCALE)
+
+        # =========================
+        # Preprocess Full Mammogram
+        # =========================
+
+        # Get all hyperparameters.
+        left = 0.01
+        right = 0.01
+        up = 0.04
+        down = 0.04
+        thresh = 0.1
+        maxValue = 1.0
+        i1 = np.uint8(23)
+        kSize = i1
+        operation = "open"
+        reverse = True
+        topXContours = 1
+        outputFormat = ".png"
+
+        # Preprocess full mammogram images.
+        fullMammPreprocessed, toLRFlip = fullMammoPreprocess(
+                logger = None,
+                img = fullMamm,
+                left = left,
+                right = right,
+                up = up,
+                down = down,
+                thresh = thresh,
+                maxval = maxValue,
+                ksize = kSize,
+                operation = operation,
+                reverse = reverse,
+                topXContours = topXContours,
+                mode = 'csaw',
+                mammMask = mammGlandMask
+        )
+
+        # Need to normalise to [0, 255] before saving as .png.
+        fullMammPreprocessedNormalized = cv2.normalize(
+                fullMammPreprocessed,
+                None,
+                alpha = 0,
+                beta = 255,
+                norm_type = cv2.NORM_MINMAX,
+                dtype = cv2.CV_32F,
+        )
+
+        # Save preprocessed full mammogram image.
+        savedFilename = (
+                os.path.basename(fullMammPath)
+                + "___PRE"
+                + outputFormat
+        )
+        savedFilePath = os.path.join(outputImagesPath, savedFilename)
+
+        cv2.imwrite(savedFilePath, fullMammPreprocessedNormalized)
+        # print(f"DONE FULL: {fullMammPath}")
+
+        # ================================
+        # Preprocess Corresponding Mask(s)
+        # ================================
+
+        # Get the path of corresponding ROI mask(s) .dcm file(s).
+
+        masksPathsList = [i for i in masksPaths if mammID in i]
+
+        for mp in masksPathsList:
+            maskArray = cv2.imread(mp, cv2.IMREAD_GRAYSCALE)
+
+            # Preprocess.
+            mask_pre = maskPreprocess(logger = None, mask = maskArray, toLRFlip = toLRFlip)
+
+            # Save preprocessed mask.
+            savedFilename = (
+                    os.path.basename(mp).replace(".dcm", "") + "___PRE" + outputFormat
+            )
+            savedFilePath = os.path.join(outputMasksPath, savedFilename)
+            cv2.imwrite(savedFilePath, mask_pre)
+
+        #  print(f"DONE MASK: {mp}")
+
+        count += 1
+
+        # if count == 1:
+        #     break
+
+    print(f"Total count = {count}")
+    print()
+    print("Getting out of imagePreprocessing module.")
+    print("-" * 30)
+
+    return
+
+
 def __CBISParametricRoutine(dcmFolder: str,
                             originalPreprocessedIMGFolderPath: str,
                             originalPreprocessedMSKFolderPath: str,
@@ -739,22 +890,22 @@ def __CBISParametricRoutine(dcmFolder: str,
 
 
 def CBISFullRoutine():
-    originalTrainingPreprocessedIMGFolderPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Training-Preprocessed-IMG"
-    originalTrainingPreprocessedMSKFolderPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Training-Preprocessed-MSK"
-    originalTrainingCSVPath = "/Users/pablo/Desktop/nl2-project/CBIS/mass_case_description_train_set.csv"
-    updatedTrainingCSVPath = "/Users/pablo/Desktop/nl2-project/CBIS/mass_case_description_train_set_UPDATED.csv"
+    originalTrainingPreprocessedIMGFolderPath = "../CBIS/intermediate/CBIS-Original-Training-Preprocessed-IMG"
+    originalTrainingPreprocessedMSKFolderPath = "../CBIS/intermediate/CBIS-Original-Training-Preprocessed-MSK"
+    originalTrainingCSVPath = "../CBIS/mass_case_description_train_set.csv"
+    updatedTrainingCSVPath = "../CBIS/mass_case_description_train_set_UPDATED.csv"
 
-    originalTestingPreprocessedIMGFolderPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Testing-Preprocessed-IMG"
-    originalTestingPreprocessedMSKFolderPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Testing-Preprocessed-MSK"
-    originalTestingCSVPath = "/Users/pablo/Desktop/nl2-project/CBIS/mass_case_description_test_set.csv"
-    updatedTestingCSVPath = "/Users/pablo/Desktop/nl2-project/CBIS/mass_case_description_test_set_UPDATED.csv"
+    originalTestingPreprocessedIMGFolderPath = "../CBIS/intermediate/CBIS-Original-Testing-Preprocessed-IMG"
+    originalTestingPreprocessedMSKFolderPath = "../CBIS/intermediate/CBIS-Original-Testing-Preprocessed-MSK"
+    originalTestingCSVPath = "../CBIS/mass_case_description_test_set.csv"
+    updatedTestingCSVPath = "../CBIS/mass_case_description_test_set_UPDATED.csv"
 
-    completePreprocessedIMGFolderPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Preprocessed-Complete-IMG"
-    completePreprocessedMSKFolderPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Preprocessed-Complete-MSK"
+    completePreprocessedIMGFolderPath = "../CBIS/CBIS-Original-Preprocessed-Complete-IMG"
+    completePreprocessedMSKFolderPath = "../CBIS/cBIS-Original-Preprocessed-Complete-MSK"
 
     abnormality_col = "abnormality_id"
     extension = ".png"
-    output_path = "/Users/pablo/Desktop/nl2-project/CBIS/test1"
+    output_path = "../CBIS/test1"
 
     __CBISParametricRoutine(dcmFolder = "/Users/pablo/Desktop/CBIS-Training",
                             originalPreprocessedIMGFolderPath = originalTrainingPreprocessedIMGFolderPath,
@@ -777,5 +928,23 @@ def CBISFullRoutine():
                             extension = extension)
 
 
+def CSAWFullRoutine():
+
+    originalCSAWImagesPath = "../CSAW/intermediate/CSAW-Original-IMG"
+    originalCSAWMasksPath = "../CSAW/intermediate/CSAW-Original-MSK"
+    mammGlandsMasksPath = "../CSAW/intermediate/CSAW-Original-Mammary-Gland"
+
+    originalPreprocessedCSAWImagesPath = "../CSAW/CSAW-Original-Preprocessed-IMG"
+    originalPreprocessedCSAWMakskPath = "../CSAW/CSAW-Original-Preprocessed-MSK"
+
+    CSAWPreprocessing(logger = None,
+                      imagesPath = originalCSAWImagesPath,
+                      masksPath = originalCSAWMasksPath,
+                      outputImagesPath = originalPreprocessedCSAWImagesPath,
+                      outputMasksPath = originalPreprocessedCSAWMakskPath,
+                      mammGlandMasksPath = mammGlandsMasksPath)
+
+
 if __name__ == '__main__':
+    # CSAWFullRoutine()
     CBISFullRoutine()

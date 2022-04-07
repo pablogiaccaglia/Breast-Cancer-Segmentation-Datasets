@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Jan 19 15:43:43 2021
 
-@author:  Asma Baccouche
-"""
 from __future__ import print_function
 
 import logging
@@ -23,12 +19,12 @@ from preprocessing import utils
 import tensorflow as tf
 
 tf.random.set_seed(
-    42
+        42
 )
 
 K.set_image_data_format('channels_last')  # TF dimension ordering in this code
 
-#identify GPU
+# identify GPU
 device_name = tf.test.gpu_device_name()
 if not tf.config.list_physical_devices('GPU'):
     raise SystemError('GPU device not found')
@@ -197,6 +193,7 @@ def get_rwnet():
                   metrics = [dice_coef, iou_coef])
     return model
 
+
 def main():
     print('-' * 30)
     print('Creating and compiling model...')
@@ -208,7 +205,7 @@ def main():
     name = 'mydata'
 
     # fname = 'rwnet_cbis_join_weights.h5'
-    fname = '/Users/pablo/Desktop/nl2-project/unet/' + name + '_weights.h5'
+    fname = 'unet/' + name + '_weights.h5'
     pred_dir = fname[:-11]
 
     model_checkpoint = ModelCheckpoint(fname, monitor = 'val_loss', verbose = 1, save_best_only = True)
@@ -217,14 +214,119 @@ def main():
     print('Fitting model...')
     print('-' * 30)
 
-    imgs_train, imgs_val, imgs_mask_train, imgs_mask_val = utils.prepareData()
+    imgs_train, imgs_val, imgs_mask_train, imgs_mask_val, imgs_test, imgs_mask_test_gt = utils.getDatasetForNet()
 
-    model.fit(imgs_train, imgs_mask_train, batch_size = 8, epochs = 100, verbose = 1,
-              callbacks = [model_checkpoint],
-              validation_data = (imgs_val, imgs_mask_val),
-              shuffle = True)
+    imgs_train = imgs_train.astype('float32')
+    mean = np.mean(imgs_train)  # mean for data centering
+    std = np.std(imgs_train)  # std for data normalization
 
-    model.save_weights('/Users/pablo/Desktop/nl2-project/CBIS/test')
+    imgs_mask_train -= mean
+    imgs_mask_train /= std
+    imgs_mask_train = imgs_mask_train.astype('float32')
+
+    imgs_mask_train /= 255.  # scale masks to [0, 1]
+    imgs_mask_train = imgs_mask_train[..., np.newaxis]
+
+    history = model.fit(imgs_train, imgs_mask_train, batch_size = 8, epochs = 100, verbose = 1,
+                        callbacks = [model_checkpoint],
+                        validation_data = (imgs_val, imgs_mask_val),
+                        shuffle = True)
+
+    print('-' * 30)
+    print('Loading and preprocessing test data...')
+    print('-' * 30)
+
+    imgs_test = imgs_test.astype('float32')
+    imgs_test -= mean
+    imgs_test /= std
+
+    print('-' * 30)
+    print('Loading saved weights...')
+    print('-' * 30)
+    model.save_weights('CBIS/test')
+
+    print('-' * 30)
+    print('Predicting masks on test data...')
+    print('-' * 30)
+
+    imgs_mask_test = model.predict(imgs_test, verbose = 1)
+    np.save('imgs_mask_test_' + name + '_wunet.npy', imgs_mask_test)
+
+    print('-' * 30)
+    print('Saving predicted masks to files...')
+    print('-' * 30)
+
+    if not os.path.exists(pred_dir):
+        os.mkdir(pred_dir)
+
+    # data_path2 = 'D:/Files/MYDATA/Breast_Cancer-Begonya/Images/Test_Seg/'
+    data_path2 = 'D:/INbreast/Test_Seg/'
+    # data_path2 = 'D:/CBIS_augmented/Test_Seg/'
+    # data_path2 = 'D:/CSAW-S/CsawS/Test_Seg/'
+
+    d = data_path2 + 'roi/*.png'
+    files = glob.glob(d)
+
+    files1 = files
+
+    data_path2 = 'D:/Files/MYDATA/Breast_Cancer-Begonya/Images/Test_Seg/'
+
+    d = data_path2 + 'roi/*.png'
+    files = glob.glob(d)
+
+    files2 = files
+
+    files = files1 + files2
+
+    files = [file.split('\\')[-1][:-4] for file in files]
+    idx = 0
+    for image, image_id in zip(imgs_mask_test, imgs_mask_test_gt):
+        image = (image[:, :, 0] * 255.).astype(np.uint8)
+        imsave(os.path.join(pred_dir, files[idx] + '_pred.png'), image)
+        idx = idx + 1
+
+    imgs_mask_test_gt = imgs_mask_test_gt.astype('float32')
+    imgs_mask_test_gt = imgs_mask_test_gt[..., np.newaxis]
+    imgs_mask_test_gt = imgs_mask_test_gt // 255
+
+    ev = model.evaluate(imgs_test, imgs_mask_test_gt)
+    dice, iou = ev[1], ev[2]
+
+    print("dice score:", dice)
+    print("iou score:", iou)
+
+    # l=[]
+    # for i in range(len(imgs_test)):
+    #    l.append(model.evaluate(imgs_test[i,:].reshape(1,256,256,3), imgs_id_test[i,:].reshape(1,256,256,1))[2])
+    #
+    # ll = [elt for elt in l if elt>=0.9]
+    #
+    # np.mean(ll)
+
+    plt.plot(history.history['dice_coef'])
+    plt.plot(history.history['val_dice_coef'])
+    plt.title('model dice coef')
+    plt.ylabel('dice coef')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc = 'upper left')
+    plt.show()
+
+    plt.plot(history.history['iou_coef'])
+    plt.plot(history.history['val_iou_coef'])
+    plt.title('model iou coef')
+    plt.ylabel('iou coef')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc = 'upper left')
+    plt.show()
+
+    # summarize history for loss
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc = 'upper left')
+    plt.show()
 
 
 if __name__ == '__main__':

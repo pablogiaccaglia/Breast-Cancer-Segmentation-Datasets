@@ -72,7 +72,7 @@ def augment(image: np.ndarray, mask: np.ndarray, targetSize: int = 256) -> tuple
     aug = A.Compose([
         A.Crop(x_min = 0, y_min = 0, y_max = int(height*2/3), x_max = int(width*2/3), p = 0.4),
         A.RandomRotate90(p = 0.8),
-        A.Transpose(p = 0.5),
+        A.Transpose(p = 0.3),
         A.RandomBrightnessContrast(p = 0.5, contrast_limit = 0.08, brightness_limit=0.08),
         A.Resize(height = targetSize, width = targetSize),
         A.OneOf([
@@ -83,4 +83,17 @@ def augment(image: np.ndarray, mask: np.ndarray, targetSize: int = 256) -> tuple
     augmented = aug(image = image, mask = mask)
 
     return augmented['image'], augmented['mask']
+
+def rotateFlipData(image: np.ndarray, mask: np.ndarray) -> tuple:
+    aug = A.Compose([
+        A.RandomRotate90(p = 0.5),
+        A.OneOf([
+            A.HorizontalFlip(p = 0.8),
+            A.VerticalFlip(p = 0.8)
+        ], p = 0.5)])
+
+    augmented = aug(image = image, mask = mask)
+
+    return augmented['image'], augmented['mask']
+
 

@@ -533,20 +533,20 @@ def updateCSV(logger, mass_csv_path, mass_png_folder, masks_folder, output_csv_p
 if __name__ == '__main__':
     """
     refactorCBIS(logger = None,
-                 topDirectory = "/Users/pablo/Desktop/CBIS/manifest-ZkhPvrLo5216730872708713142/CBIS-DDSM")
+                 topDirectory = "CBIS/manifest-ZkhPvrLo5216730872708713142/CBIS-DDSM")
 ds = pydicom.filereader.dcmread(
-        "/Users/pablo/Desktop/CBIS/manifest-ZkhPvrLo5216730872708713142/CBIS-DDSM/P_01867_LEFT_MLO_MASK_2___a.dcm")
+        "CBIS/manifest-ZkhPvrLo5216730872708713142/CBIS-DDSM/P_01867_LEFT_MLO_MASK_2___a.dcm")
 print(ds)
 
 ds = pydicom.filereader.dcmread(
-        "/Users/pablo/Desktop/CBIS/manifest-ZkhPvrLo5216730872708713142/CBIS-DDSM/P_00038_RIGHT_MLO_FULL.dcm")
+        "CBIS/manifest-ZkhPvrLo5216730872708713142/CBIS-DDSM/P_00038_RIGHT_MLO_FULL.dcm")
 print(ds)
-
+ 
     """
-    mass_csv_path = "/Users/pablo/Desktop/nl2-project/CBIS/mass_case_description_train_set.csv"
-    mass_png_folder = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Training-Preprocessed-IMG"
+    mass_csv_path = "CBIS/mass_case_description_train_set.csv"
+    mass_png_folder = "CBIS/intermediate/CBIS-Original-Training-Preprocessed-IMG"
     output_csv_path = "/CBIS/mass_case_description_train_set_UPDATED.csv"
-    masks_folder = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Training-Preprocessed-MSK"
+    masks_folder = "CBIS/intermediate/CBIS-Original-Training-Preprocessed-MSK"
 
     updateCSV(logger = None, mass_csv_path = mass_csv_path, mass_png_folder = mass_png_folder,
               masks_folder = masks_folder,

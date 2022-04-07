@@ -1,5 +1,7 @@
 import os
+import shutil
 from itertools import combinations
+from typing import Union
 
 import cv2
 import numpy as np
@@ -8,7 +10,8 @@ from augmentations import augment
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 
-from preprocessing.preprocessing import pad
+from preprocessing import pad
+from augmentations import rotateFlipData
 
 
 def imgAugment(logger, self, x_img, y_img):
@@ -100,20 +103,29 @@ def datasetPaths(
     x_paths_list = []
     y_paths_list = []
 
+    full_img_dir = full_img_dir
+    mask_img_dir = mask_img_dir
+
     try:
 
         # =======================================
         #  1. Get paths of X (full) and y (mask)
         # =======================================
 
-        # Get paths of train images and masks.
-        for full in os.listdir(full_img_dir):
-            if full.endswith(extension):
-                x_paths_list.append(os.path.join(full_img_dir, full))
+        if type(full_img_dir) != list and type(mask_img_dir):
+            full_img_dir = [full_img_dir]
+            mask_img_dir = [mask_img_dir]
 
-        for mask in os.listdir(mask_img_dir):
-            if mask.endswith(extension):
-                y_paths_list.append(os.path.join(mask_img_dir, mask))
+        for dir in full_img_dir:
+            # Get paths of train images and masks.
+            for full in os.listdir(dir):
+                if full.endswith(extension):
+                    x_paths_list.append(os.path.join(dir, full))
+
+        for dir in mask_img_dir:
+            for mask in os.listdir(dir):
+                if mask.endswith(extension):
+                    y_paths_list.append(os.path.join(dir, mask))
 
         # ** IMPORTANT ** Sort so that FULL and MASK images are in an order
         # that corresponds with each other.
@@ -122,7 +134,7 @@ def datasetPaths(
 
     except Exception as e:
         # logger.error(f'Unable to datasetPaths!\n{e}')
-        print((f"Unable to datasetPaths!\n{e}"))
+        print(f"Unable to datasetPaths!\n{e}")
 
     return x_paths_list, y_paths_list
 
@@ -308,7 +320,8 @@ def augmentDataset(images: list, masks: list, augmentingFactor: int) -> (list, l
     return augmented_test_images, augmented_test_masks
 
 
-def loadData(imagesPath: str, masksPath: str, mode: str, augmentationFactor: int = None):
+def loadData(imagesPath: Union[str, list[str]], masksPath: Union[str, list[str]], mode: str,
+             augmentationFactor= None):
     target_size = (
         256,
         256,
@@ -345,9 +358,22 @@ def loadData(imagesPath: str, masksPath: str, mode: str, augmentationFactor: int
     ]
 
     if mode == "augment" and augmentationFactor is not None:
+
         augmented_images, augmented_masks = augmentDataset(images = imgs,
                                                            masks = masks,
                                                            augmentingFactor = augmentationFactor)
+
+        tempImgs = []
+        tempMsks = []
+
+        for img, msk in zip(imgs, masks):
+            img, msk = rotateFlipData(image = img, mask = msk)
+            tempImgs.append(img)
+            tempMsks.append(msk)
+
+        imgs = tempImgs
+        masks = tempMsks
+
         masks = masks + augmented_masks
         imgs = imgs + augmented_images
 
@@ -365,28 +391,17 @@ def saveImages(images: list[np.ndarray], dirPath: str, outputFormat: str, baseNa
         cv2.imwrite(savedFilePath, images[i])
 
 
-def prepareData(imagesPath: str, masksPath: str, mode: str, augmentingFactor: int = None) -> tuple[list, list]:
+def prepareData(imagesPath: Union[str, list[str]], masksPath: Union[str, list[str]], mode: str,
+                augmentingFactor: int = None) -> tuple[list, list]:
     imgs, masks = loadData(imagesPath = imagesPath,
                            masksPath = masksPath,
                            augmentationFactor = augmentingFactor, mode = mode)
 
-    if mode == "net_data":
-        imgs = imgs.astype('float32')
-        mean = np.mean(imgs)  # mean for data centering
-        std = np.std(imgs)  # std for data normalization
-
-        imgs -= mean
-        imgs /= std
-        masks = masks.astype('float32')
-
-        masks /= 255.  # scale masks to [0, 1]
-        masks = masks[..., np.newaxis]
-
     return imgs, masks
 
 
-def makeFinalDataset(imagesDir: str,
-                     masksDir: str,
+def makeFinalDataset(imagesDir: Union[str, list[str]],
+                     masksDir: Union[str, list[str]],
                      trainingImgDir: str,
                      trainingMaskDir: str,
                      validationImgDir: str,
@@ -447,25 +462,35 @@ def makeFinalDataset(imagesDir: str,
 
 
 def routineMakeFinalDataset():
-    imagesPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Training-Preprocessed-IMG/"
-    masksPath = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Original-Training-Preprocessed-MSK/"
-    trainingImgDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Training-Final-IMG/"
-    trainingMaskDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Training-Final-MSK/"
-    validationImgDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Validation-Final-IMG/"
-    validationMaskDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Validation-Final-MSK/"
-    testingImgDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Testing-Final-IMG/"
-    testingMaskDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Testing-Final-MSK/"
+    imagesPathCBIS = "../CBIS/CBIS-Original-Preprocessed-Complete-IMG"
+    masksPathCBIS = "../CBIS/CBIS-Original-Preprocessed-Complete-MSK"
+
+    imagesPathCSAW = "../CSAW/CSAW-Original-Preprocessed-IMG"
+    masksPathCSAW = "../CSAW/CSAW-Original-Preprocessed-MSK"
+
+    trainingImgDir = "../CBIS/Dataset-split/CBIS-Training-Final-IMG/"
+    trainingMaskDir = "../CBIS/Dataset-split/CBIS-Training-Final-MSK/"
+    validationImgDir = "../CBIS/Dataset-split/CBIS-Validation-Final-IMG/"
+    validationMaskDir = "../CBIS/Dataset-split/CBIS-Validation-Final-MSK/"
+    testingImgDir = "../CBIS/Dataset-split/CBIS-Testing-Final-IMG/"
+    testingMaskDir = "../CBIS/Dataset-split/CBIS-Testing-Final-MSK/"
+
+    for dir in [trainingImgDir, trainingMaskDir,
+                validationImgDir, validationMaskDir,
+                testingImgDir, testingMaskDir]:
+        shutil.rmtree(dir)
+        os.makedirs(dir)
 
     trainRatio = 0.75
     validationRatio = 0.15
     testRatio = 0.10
 
-    augmentingFactor = 1
+    augmentingFactor = 8
 
     outputFormat = '.png'
 
-    makeFinalDataset(imagesDir = imagesPath,
-                     masksDir = masksPath,
+    makeFinalDataset(imagesDir = [imagesPathCBIS, imagesPathCSAW],
+                     masksDir = [masksPathCBIS, masksPathCSAW],
                      trainingImgDir = trainingImgDir,
                      trainingMaskDir = trainingMaskDir,
                      validationImgDir = validationImgDir,
@@ -479,14 +504,12 @@ def routineMakeFinalDataset():
                      outputFormat = outputFormat)
 
 
-def getDatasetsForNet() -> tuple[list, list, list, list, list, list]:
-    trainingImgDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Training-Final-IMG/"
-    trainingMaskDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Training-Final-MSK/"
-    validationImgDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Validation-Final-IMG/"
-    validationMaskDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Validation-Final-MSK/"
-    testingImgDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Testing-Final-IMG/"
-    testingMaskDir = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-Testing-Final-MSK/"
-
+def _getDatasets(trainingImgDir: str,
+                 trainingMaskDir: str,
+                 validationImgDir: str,
+                 validationMaskDir: str,
+                 testingImgDir: str,
+                 testingMaskDir: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     trainingImgs, trainingMasks = prepareData(imagesPath = trainingImgDir,
                                               masksPath = trainingMaskDir,
                                               augmentingFactor = None, mode = 'net_data')
@@ -497,8 +520,25 @@ def getDatasetsForNet() -> tuple[list, list, list, list, list, list]:
                                             masksPath = testingMaskDir,
                                             augmentingFactor = None, mode = 'net_data')
 
-    return trainingImgs, trainingMasks, validationImgs, validationMasks, testingImgs, testingMasks
+    return np.stack(trainingImgs), np.stack(trainingMasks), np.stack(validationImgs), np.stack(validationMasks), np.stack(testingImgs), np.stack(testingMasks)
+
+
+def getDatasetForNet() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    trainingImgDir = "CBIS/Dataset-split/CBIS-Training-Final-IMG/"
+    trainingMaskDir = "CBIS/Dataset-split/CBIS-Training-Final-MSK/"
+    validationImgDir = "CBIS/Dataset-split/CBIS-Validation-Final-IMG/"
+    validationMaskDir = "CBIS/Dataset-split/CBIS-Validation-Final-MSK/"
+    testingImgDir = "CBIS/Dataset-split/CBIS-Testing-Final-IMG/"
+    testingMaskDir = "CBIS/Dataset-split/CBIS-Testing-Final-MSK/"
+
+    return _getDatasets(trainingImgDir = trainingImgDir,
+                        trainingMaskDir = trainingMaskDir,
+                        validationImgDir = validationImgDir,
+                        validationMaskDir = validationMaskDir,
+                        testingImgDir = testingImgDir,
+                        testingMaskDir = testingMaskDir)
 
 
 if __name__ == '__main__':
-    pass
+    # 12:23
+    routineMakeFinalDataset()
