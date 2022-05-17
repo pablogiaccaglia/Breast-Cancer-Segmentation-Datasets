@@ -31,8 +31,7 @@ def findMultiTumour(logger, csv_path, abnormality_col):
         df = pd.read_csv(csv_path, header = 0)
 
         # Get rows with more than 1 abnormality.
-        multi_df = df.loc[df[abnormality_col] > 1]
-
+        multi_df = df.loc[df[abnormality_col] > 1 & df['full_path'].notnull() & df['mask_path'].notnull()]
         multi_tumour_list = []
         for row in multi_df.itertuples():
             # Get patient ID, image view and description.
@@ -126,14 +125,25 @@ def sumMasks(logger, mask_list):
         The summed mask, ranging from [0, 1].
     """
 
+    # some calc testing masks belonging to same image have different shapes!! So we
+    # make the shape of the mask as same as the shape of the image, which is the minimum
+    # of the shapes found
+
+    minSize = mask_list[0].shape[0]
+    for i in mask_list:
+        if i.shape[0] < minSize:
+            minSize = i.shape[0]
+
+    for i in range(0, len(mask_list)):
+        mask_list[i] = mask_list[i][:minSize, : minSize]
+
+    summed_mask = np.zeros(mask_list[0].shape)
+
     try:
-
-        summed_mask = np.zeros(mask_list[0].shape)
-
         for arr in mask_list:
             summed_mask = np.add(summed_mask, arr)
 
-        # Binarise (there might be some overlap, resulting in pixels with
+        # Binarize (there might be some overlap, resulting in pixels with
         # values of 510, 765, etc...)
         _, summed_mask_bw = cv2.threshold(
                 src = summed_mask, thresh = 1, maxval = 255, type = cv2.THRESH_BINARY
@@ -151,7 +161,7 @@ def removeFiles(logger, filesToRemove):
         os.remove(f)
 
 
-def handleMultiTumor(csv_path, abnormality_col, img_path, masks_path, extension, output_path):
+def handleMultiTumor(csv_path, abnormality_col, img_path, masks_path, extension, output_path, suffix):
     """main function for imagePreprocessing module.
     This function takes a path of the raw image folder,
     iterates through each image and executes the necessary
@@ -164,7 +174,7 @@ def handleMultiTumor(csv_path, abnormality_col, img_path, masks_path, extension,
     logger : {logging.Logger}
         The logger used for logging error information
     resultsDict: {dict}
-        A dintionary containing information about the
+        A dictionary containing information about the
         command line arguments. These can be used for
         overwriting command line arguments as needed.
     """
@@ -178,29 +188,30 @@ def handleMultiTumor(csv_path, abnormality_col, img_path, masks_path, extension,
             logger = None,
             masks_path = masks_path, multi_tumour_set = multi_tumour_set, extension = extension
     )
-
     # Sum!
     for k, v in masks_to_sum_dict.items():
 
         # Get image as arrays.
         mask_list = [cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE) for mask_path in v]
 
+        # special case in the case of updated csv's entries in which mask path or image path columns are empty,
+        # due to the fact that the corresponding files are corrupted thus excluded from the updated version of the csv.
+        if len(mask_list) == 0 or len(v) == 0:
+            continue
         # Sum masks
         summed_mask = sumMasks(logger = None, mask_list = mask_list)
 
+        save_path = suffix + k + '_' + "MASK___PRE.png"
+
         # Save summed mask
-        if "train" in img_path.lower():
-            save_path = os.path.join(
-                    output_path, ("_".join(["Mass-Training", k, "MASK___PRE.png"]))
-            )
-        elif "test" in img_path.lower():
-            save_path = os.path.join(
-                    output_path, ("_".join(["Mass-Test", k, "MASK___PRE.png"]))
-            )
+        save_path = os.path.join(
+                output_path, save_path
+        )
 
         cv2.imwrite(save_path, summed_mask)
 
-        removeFiles(logger = None, filesToRemove = v)
+        removeFiles(logger = None,
+                    filesToRemove = v)  # TODO BETTER TO COPY ALL THE FILES WITH THE SUMMED ONES IN A NEW FOLDER!
 
     print()
     print("Getting out of mergeMultiTumour module.")

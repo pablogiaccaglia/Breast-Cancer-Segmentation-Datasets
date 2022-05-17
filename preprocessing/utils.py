@@ -1,17 +1,16 @@
 import os
-import shutil
 from itertools import combinations
+import random
 from typing import Union
 
 import cv2
 import numpy as np
 import tensorflow as tf
-from augmentations import augment
 from sklearn.model_selection import train_test_split
-from matplotlib import pyplot as plt
 
-from preprocessing import pad
+from augmentations import augment
 from augmentations import rotateFlipData
+from preprocessing import getMaskPatch, getPatches
 
 
 def imgAugment(logger, self, x_img, y_img):
@@ -139,7 +138,7 @@ def datasetPaths(
     return x_paths_list, y_paths_list
 
 
-def loadFullImg(logger, path, dsize, mode: str):
+def loadImg(logger, path, mskPath = None, dsize = None, mode: str = None, patchify: bool = False):
     """
         Follows the flow:
         1.         datasetPaths()
@@ -164,7 +163,7 @@ def loadFullImg(logger, path, dsize, mode: str):
 
         Returns
         -------
-        full_img : {numpy.ndarray}
+        fullImg : {numpy.ndarray}
             The loaded image with shape = (self.target_size, self.target_size, 3)
         """
 
@@ -175,42 +174,53 @@ def loadFullImg(logger, path, dsize, mode: str):
         if not isinstance(path, str):
             path = path.decode()
 
-        img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+        img = cv2.imread(path)
+        img = img.astype(np.float32)
 
-        paddedImage = pad(logger = logger, img = img)
-        paddedImage = cv2.normalize(
-                paddedImage,
-                None,
-                alpha = 0,
-                beta = 255,
-                norm_type = cv2.NORM_MINMAX,
-                dtype = cv2.CV_32F,
-        )
+        if mode == 'net_data':
+            msk = cv2.imread(mskPath, cv2.IMREAD_GRAYSCALE)
+            patchedMaskImage, coords = getMaskPatch(img, msk)
 
-        img = cv2.resize(src = paddedImage, dsize = dsize)
+            # TODO handle better this case, in which the image doesn't contains no mask!!!
+            if patchedMaskImage.shape[0] != 0 or patchedMaskImage.shape[1] != 0:
+                patchedMaskImage = cv2.resize(patchedMaskImage, (224, 224))
 
-        if mode == "net_data":
+            else:
+                patchedMaskImage = None
+                coords = None
 
-            # Min max normalise to [0, 1].
-            norm_img = (img - img.min()) / (img.max() - img.min())
+            width = img.shape[0]  # 3757
+            param = 5
+            dim = width // param  # 751
+            multiplier = dim // 224
+            fixedDim = 224 * multiplier
+
+            f = lambda x: cv2.resize(x, (224, 224))
+
+            if patchify:
+                patches = getPatches(img, width = fixedDim, height = fixedDim, channels = 3, step = fixedDim // 2)
+                patches = list(map(f, patches))
+
+                if patchedMaskImage is not None:
+                    patches.append(patchedMaskImage)
+                return patches, coords
+            else:
+                return patchedMaskImage, coords
 
         else:
-            norm_img = img
-
-        if mode == "net_data":
-            # Stack grayscale image to make channels=3.
-            full_img = np.stack([norm_img, norm_img, norm_img], axis = -1)
-
-        full_img = img
+            try:
+                img = cv2.resize(img, (224, 224, 3))
+            except:
+                img = cv2.resize(img, (224, 224))
+            return img
 
     except Exception as e:
         # logger.error(f'Unable to loadFullImg!\n{e}')
         print(f"Unable to loadFullImg!\n{e}")
+        print(path)
 
-    return full_img
 
-
-def loadMaskImg(logger, path, dsize, mode: str):
+def loadMaskImg(logger, path, dsize, mode: str, coords = None, patchify = False):
     """
         Follows the flow:
         1.         datasetPaths()
@@ -247,39 +257,46 @@ def loadMaskImg(logger, path, dsize, mode: str):
         if not isinstance(path, str):
             path = path.decode()
 
-        img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+        mask = cv2.imread(path)
+        mask = mask[:, :, 0]
+        mask = np.expand_dims(mask, axis = -1)
+        patchedMask = mask  # (x,y,1)
 
-        paddedImage = pad(logger = logger, img = img)
-        paddedImage = cv2.normalize(
-                paddedImage,
-                None,
-                alpha = 0,
-                beta = 255,
-                norm_type = cv2.NORM_MINMAX,
-                dtype = cv2.CV_32F,
-        )
+        if coords is not None:
+            patchedMask = patchedMask[coords[0]: coords[1], coords[2]: coords[3], :]
+            patchedMask = cv2.resize(patchedMask, (224, 224))
+        else:
+            patchedMask = None
 
-        img = cv2.resize(src = paddedImage, dsize = dsize)
+        width = mask.shape[0]  # 3757
+        param = 5
+        dim = width // param  # 751
+        multiplier = dim // 224
+        fixedDim = 224 * multiplier
 
-        if mode == "net_data":
-            # Min max normalise to [0, 1].
-            norm_img = (img - img.min()) / (img.max() - img.min())
+        f = lambda x: cv2.resize(x, (224, 224))
+
+        if patchify:
+            patches = getPatches(mask, width = fixedDim, height = fixedDim, channels = 1, step = fixedDim // 2)
+            patches = list(map(f, patches))
+
+            if patchedMask is not None:
+                patches.append(patchedMask)
+
+            return patches
+
+        if mode == 'ndarray' and len(mask.shape) == 2:
+            # Expand shape to (width, height, 1).
+            mask = np.expand_dims(mask, axis = -1)
 
         else:
-            norm_img = img
+            mask = patchedMask
 
-        if mode == "net_data":
-            # Expand shape to (width, height, 1).
-            mask_img = np.expand_dims(norm_img, axis = -1)
-
-        mask_img = img
-
+        return mask
 
     except Exception as e:
         # logger.error(f'Unable to loadMaskImg!\n{e}')
         print(f"Unable to loadMaskImg!\n{e}")
-
-    return mask_img
 
 
 def checkAllDifferent(elems: list):
@@ -321,14 +338,14 @@ def augmentDataset(images: list, masks: list, augmentingFactor: int) -> (list, l
 
 
 def loadData(imagesPath: Union[str, list[str]], masksPath: Union[str, list[str]], mode: str,
-             augmentationFactor= None):
+             augmentationFactor = None):
     target_size = (
-        256,
-        256,
+        224,
+        224,
     )
 
     # Seeding.
-    seed = "seed"
+    seed = 42
     tf.random.set_seed(seed)
 
     # ====================
@@ -346,16 +363,124 @@ def loadData(imagesPath: Union[str, list[str]], masksPath: Union[str, list[str]]
     # test_y = [test_y[0], test_y[1], test_x[2]]
 
     # Read FULL images.
-    imgs = [
-        loadFullImg(logger = None, path = path, dsize = target_size, mode = mode)
-        for path in test_x
-    ]
 
-    # Read MASK images.
-    masks = [
-        loadMaskImg(logger = None, path = path, dsize = target_size, mode = mode)
-        for path in test_y
-    ]
+    c = list(zip(test_x, test_y))
+
+    random.shuffle(c)
+
+    test_x, test_y = zip(*c)
+
+    imgs = []
+    masks = []
+
+
+
+    if mode == 'net_data':
+
+        coords = []
+        patchify = True
+
+        for path, mskPath in zip(test_x, test_y):
+            img, coord = loadImg(logger = None, path = path, mskPath = mskPath, dsize = target_size, mode = mode,
+                                 patchify = patchify)
+
+            if patchify:  # img is a list
+                imgs = imgs + img
+
+            else:  # img is numpy array
+                imgs.append(img)
+
+            coords.append(coord)
+
+        # Read MASK images.
+
+        for path, c in zip(test_y, coords):
+            msk = loadMaskImg(logger = None, path = path, dsize = target_size, mode = mode, coords = c,
+                              patchify = patchify)
+
+            if patchify:
+                masks = masks + msk  # msk is a list
+            else:
+                masks.append(msk)  # msk is numpy array
+
+        # cleaning part, here we first move images and masks containing masses or portions of it in a separated list,
+        # then we filter the remaining pairs such as 40% of the whole paris contains masses, 60% doesn't contain them.
+        # Of this 60%, 10% are totally black patches. This is a reasonable choice since there are a lot of patches
+        # which are not completely black which are not in this 10%.
+        if patchify:
+            imagesWithMasses = []
+            masksWithMasses = []
+
+            imagesWithoutMasses = []
+            masksWithoutMasses = []
+
+            for im, mask in zip(imgs, masks):
+                if mask.sum() > 0:
+                    imagesWithMasses.append(im)
+                    masksWithMasses.append(mask)
+                else:
+                    imagesWithoutMasses.append(im)
+                    masksWithoutMasses.append(mask)
+
+            # del imgs
+            # del masks
+
+            lenImagesWithMasses = len(imagesWithMasses)
+            lenImagesWithoutMasses = int(0.6 * (lenImagesWithMasses / 0.4))
+            lenBlackImages = int(lenImagesWithoutMasses * 0.1)
+            lenNotBlackImages = lenImagesWithoutMasses - lenBlackImages
+
+            keptImagesWithoutMasses = []
+            keptMasksWithoutMasses = []
+
+            counterBlackImages = 0
+            counterNotBlackImages = 0
+
+            # some shuffling
+
+            c = list(zip(imagesWithoutMasses, masksWithoutMasses))
+
+            random.shuffle(c)
+
+            imagesWithoutMasses, masksWithoutMasses = zip(*c)
+
+            for im, mask in zip(imagesWithoutMasses, masksWithoutMasses):
+
+                if im.sum() > 0:
+
+                    if counterNotBlackImages >= lenNotBlackImages:
+                        continue
+
+                    counterNotBlackImages += 1
+
+                else:
+
+                    if counterBlackImages >= lenBlackImages:
+                        continue
+                    counterBlackImages += 1
+
+                keptImagesWithoutMasses.append(im)
+                keptMasksWithoutMasses.append(mask)
+
+            imagesWithoutMasses = keptImagesWithoutMasses
+            masksWithoutMasses = keptMasksWithoutMasses
+
+            imgs = imagesWithoutMasses + imagesWithMasses
+            masks = masksWithoutMasses + masksWithMasses
+
+    elif mode == 'ndarrays':
+
+        # Read FULL images.
+        imgs = [
+            loadImg(logger = None, path = path, dsize = target_size, mode = mode)
+            for path in test_x
+        ]
+
+        # Read MASK images.
+        masks = [
+            loadMaskImg(logger = None, path = path, dsize = target_size, mode = mode)
+            for path in test_y
+        ]
 
     if mode == "augment" and augmentationFactor is not None:
 
@@ -378,16 +503,15 @@ def loadData(imagesPath: Union[str, list[str]], masksPath: Union[str, list[str]]
         imgs = imgs + augmented_images
 
     elif mode == "net_data":
-        masks = np.array(masks, dtype = np.float64)
-        imgs = np.array(imgs, dtype = np.float64)
+        pass
 
     return imgs, masks
 
 
-def saveImages(images: list[np.ndarray], dirPath: str, outputFormat: str, baseName: str):
+def saveImages(images: list[np.ndarray], dirPath: str, outputFormat: str, baseName: str, prefix: str):
     for i in range(len(images)):
         # Save preprocessed full mammogram image.
-        savedFilePath = dirPath + baseName + "__" + str(i + 1).zfill(5) + outputFormat
+        savedFilePath = dirPath + prefix + baseName + "__" + str(i + 1).zfill(5) + outputFormat
         cv2.imwrite(savedFilePath, images[i])
 
 
@@ -398,6 +522,18 @@ def prepareData(imagesPath: Union[str, list[str]], masksPath: Union[str, list[st
                            augmentationFactor = augmentingFactor, mode = mode)
 
     return imgs, masks
+
+
+def rflip(a, b):
+    x = []
+    y = []
+
+    for img, msk in zip(a, b):
+        img, msk = rotateFlipData(image = img, mask = msk)
+        x.append(img)
+        y.append(msk)
+
+    return x, y
 
 
 def makeFinalDataset(imagesDir: Union[str, list[str]],
@@ -412,10 +548,11 @@ def makeFinalDataset(imagesDir: Union[str, list[str]],
                      trainRatio: float,
                      validationRatio: float,
                      testRatio: float,
-                     outputFormat: str):
+                     outputFormat: str,
+                     prefix: str):
     imgs, imgsMasks, = prepareData(imagesPath = imagesDir,
                                    masksPath = masksDir,
-                                   augmentingFactor = augmentingFactor, mode = 'augment')
+                                   augmentingFactor = augmentingFactor, mode = 'net_data')
 
     """    plt.imshow(imgs[0], cmap = plt.cm.gray)
         plt.show()
@@ -451,22 +588,51 @@ def makeFinalDataset(imagesDir: Union[str, list[str]],
     xVal, xTest, yVal, yTest = train_test_split(xTest, yTest,
                                                 test_size = testRatio / (testRatio + validationRatio))
 
-    saveImages(images = xTrain, dirPath = trainingImgDir, outputFormat = outputFormat, baseName = "Training-IMG")
-    saveImages(images = yTrain, dirPath = trainingMaskDir, outputFormat = outputFormat, baseName = "Training-MSK")
+    augmentedXTrainingImgs, augmentedYTrainingMsks = augmentDataset(images = xTrain,
+                                                                    masks = yTrain,
+                                                                    augmentingFactor = augmentingFactor)
 
-    saveImages(images = xVal, dirPath = validationImgDir, outputFormat = outputFormat, baseName = "Validation-IMG")
-    saveImages(images = yVal, dirPath = validationMaskDir, outputFormat = outputFormat, baseName = "Validation-MSK")
+    xTrain, yTrain = rflip(a = xTrain, b = yTrain)
 
-    saveImages(images = xTest, dirPath = testingImgDir, outputFormat = outputFormat, baseName = "Testing-IMG")
-    saveImages(images = yTest, dirPath = testingMaskDir, outputFormat = outputFormat, baseName = "Testing-MSK")
+    yTrain = yTrain + augmentedYTrainingMsks
+    xTrain = xTrain + augmentedXTrainingImgs
+
+    xVal, yVal = rflip(a = xVal, b = yVal)
+    xTest, yTest = rflip(a = xTest, b = yTest)
+
+    print("ciao")
+
+    saveImages(images = xTrain, dirPath = trainingImgDir, outputFormat = outputFormat, baseName = "Training-IMG",
+               prefix = prefix)
+    saveImages(images = yTrain, dirPath = trainingMaskDir, outputFormat = outputFormat, baseName = "Training-MSK",
+               prefix = prefix)
+
+    saveImages(images = xVal, dirPath = validationImgDir, outputFormat = outputFormat, baseName = "Validation-IMG",
+               prefix = prefix)
+    saveImages(images = yVal, dirPath = validationMaskDir, outputFormat = outputFormat, baseName = "Validation-MSK",
+               prefix = prefix)
+
+    saveImages(images = xTest, dirPath = testingImgDir, outputFormat = outputFormat, baseName = "Testing-IMG",
+               prefix = prefix)
+    saveImages(images = yTest, dirPath = testingMaskDir, outputFormat = outputFormat, baseName = "Testing-MSK",
+               prefix = prefix)
 
 
 def routineMakeFinalDataset():
-    imagesPathCBIS = "../CBIS/CBIS-Original-Preprocessed-Complete-IMG"
-    masksPathCBIS = "../CBIS/CBIS-Original-Preprocessed-Complete-MSK"
+    imagesMassPathCBIS = "../CBIS/CBIS-Original-Mass-Preprocessed-Complete-IMG"
+    masksMassPathCBIS = "../CBIS/CBIS-Original-Mass-Preprocessed-Complete-MSK"
+
+    imagesCalcPathCBIS = "../CBIS/CBIS-Original-Calc-Preprocessed-Complete-IMG"
+    masksCalcPathCBIS = "../CBIS/CBIS-Original-Calc-Preprocessed-Complete-MSK"
 
     imagesPathCSAW = "../CSAW/CSAW-Original-Preprocessed-IMG"
     masksPathCSAW = "../CSAW/CSAW-Original-Preprocessed-MSK"
+
+    imagesPathBCDR = "../BCDR/BCDR-Original-Preprocessed-IMG"
+    masksPathBCDR = "../BCDR/BCDR-Original-Preprocessed-MSK"
+
+    imagesPathINBreast = "../BCDR/BCDR-Original-Preprocessed-IMG"
+    masksPathINBreast = "../BCDR/BCDR-Original-Preprocessed-MSK"
 
     trainingImgDir = "../CBIS/Dataset-split/CBIS-Training-Final-IMG/"
     trainingMaskDir = "../CBIS/Dataset-split/CBIS-Training-Final-MSK/"
@@ -475,22 +641,32 @@ def routineMakeFinalDataset():
     testingImgDir = "../CBIS/Dataset-split/CBIS-Testing-Final-IMG/"
     testingMaskDir = "../CBIS/Dataset-split/CBIS-Testing-Final-MSK/"
 
-    for dir in [trainingImgDir, trainingMaskDir,
-                validationImgDir, validationMaskDir,
-                testingImgDir, testingMaskDir]:
-        shutil.rmtree(dir)
-        os.makedirs(dir)
+    """    trainingImgDir = "/Users/pablo/Desktop/nl2-project/CBIS/prova/trainingimg/"
+        trainingMaskDir = "/Users/pablo/Desktop/nl2-project/CBIS/prova/trainingmsk/"
+        validationImgDir = "/Users/pablo/Desktop/nl2-project/CBIS/prova/validationimg/"
+        validationMaskDir = "/Users/pablo/Desktop/nl2-project/CBIS/prova/validationmask/"
+        testingImgDir = "/Users/pablo/Desktop/nl2-project/CBIS/prova/testingima/"
+        testingMaskDir = "/Users/pablo/Desktop/nl2-project/CBIS/prova/testingmask/"
+    """
+    """    for dir in [trainingImgDir, trainingMaskDir,
+                    validationImgDir, validationMaskDir,
+                    testingImgDir, testingMaskDir]:
+            try:
+                shutil.rmtree(dir)
+            except:
+                pass
+            os.makedirs(dir)"""
 
     trainRatio = 0.75
     validationRatio = 0.15
     testRatio = 0.10
 
-    augmentingFactor = 8
+    augmentingFactor = 1
 
     outputFormat = '.png'
 
-    makeFinalDataset(imagesDir = [imagesPathCBIS, imagesPathCSAW],
-                     masksDir = [masksPathCBIS, masksPathCSAW],
+    makeFinalDataset(imagesDir = [imagesPathCSAW],
+                     masksDir = [masksPathCSAW],
                      trainingImgDir = trainingImgDir,
                      trainingMaskDir = trainingMaskDir,
                      validationImgDir = validationImgDir,
@@ -501,7 +677,7 @@ def routineMakeFinalDataset():
                      trainRatio = trainRatio,
                      validationRatio = validationRatio,
                      testRatio = testRatio,
-                     outputFormat = outputFormat)
+                     outputFormat = outputFormat, prefix = 'CSAW-')
 
 
 def _getDatasets(trainingImgDir: str,
@@ -520,16 +696,17 @@ def _getDatasets(trainingImgDir: str,
                                             masksPath = testingMaskDir,
                                             augmentingFactor = None, mode = 'net_data')
 
-    return np.stack(trainingImgs), np.stack(trainingMasks), np.stack(validationImgs), np.stack(validationMasks), np.stack(testingImgs), np.stack(testingMasks)
+    return np.stack(trainingImgs), np.stack(trainingMasks), np.stack(validationImgs), np.stack(
+            validationMasks), np.stack(testingImgs), np.stack(testingMasks)
 
 
 def getDatasetForNet() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    trainingImgDir = "CBIS/Dataset-split/CBIS-Training-Final-IMG/"
-    trainingMaskDir = "CBIS/Dataset-split/CBIS-Training-Final-MSK/"
-    validationImgDir = "CBIS/Dataset-split/CBIS-Validation-Final-IMG/"
-    validationMaskDir = "CBIS/Dataset-split/CBIS-Validation-Final-MSK/"
-    testingImgDir = "CBIS/Dataset-split/CBIS-Testing-Final-IMG/"
-    testingMaskDir = "CBIS/Dataset-split/CBIS-Testing-Final-MSK/"
+    trainingImgDir = "../CBIS/Dataset-split/CBIS-Training-Final-IMG/"
+    trainingMaskDir = "../CBIS/Dataset-split/CBIS-Training-Final-MSK/"
+    validationImgDir = "../CBIS/Dataset-split/CBIS-Validation-Final-IMG/"
+    validationMaskDir = "../CBIS/Dataset-split/CBIS-Validation-Final-MSK/"
+    testingImgDir = "../CBIS/Dataset-split/CBIS-Testing-Final-IMG/"
+    testingMaskDir = "../CBIS/Dataset-split/CBIS-Testing-Final-MSK/"
 
     return _getDatasets(trainingImgDir = trainingImgDir,
                         trainingMaskDir = trainingMaskDir,
@@ -539,6 +716,125 @@ def getDatasetForNet() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, 
                         testingMaskDir = testingMaskDir)
 
 
+def loadNumpyArrays(folderPath: str, arr) -> np.ndarray:
+    i = 0
+    for entry in os.scandir(folderPath):
+
+        l = np.load(entry)
+
+        if len(l.shape) == 2:
+            l = np.reshape(l, (256, 256, 1))
+
+        print(l.shape)
+        arr[i] = l
+        i = i + 1
+        break
+
+    return arr
+
+
+def getDatasetArraysForNet() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    trainingImgDir = "../CBIS/Dataset-split-arrays/Training-Final-IMG-Arrayss/"
+    trainingMaskDir = "../CBIS/Dataset-split-arrays/Training-Final-MSK-Arrays/"
+    validationImgDir = "../CBIS/Dataset-split-arrays/Validation-Final-IMG-Arrays"
+    validationMaskDir = "../CBIS/Dataset-split-arrays/Testing-Final-MSK-Arrays/"
+    testingImgDir = "../CBIS/Dataset-split-arrays/Testing-Final-IMG-Arrays/"
+    testingMaskDir = "../CBIS/Dataset-split-arrays/Testing-Final-MSK-Arrays/"
+
+    return loadNumpyArrays(folderPath = trainingImgDir, arr = np.ndarray((13027, 256, 256, 3), dtype = 'float32')), \
+           loadNumpyArrays(folderPath = trainingMaskDir, arr = np.ndarray((13027, 256, 256, 1), dtype = 'float32')), \
+           loadNumpyArrays(folderPath = validationImgDir,
+                           arr = np.ndarray((2605, 256, 256, 3), dtype = 'float32')), loadNumpyArrays(
+            folderPath = validationMaskDir,
+            arr = np.ndarray((2605, 256, 256, 1), dtype = 'float32')), \
+           loadNumpyArrays(folderPath = testingImgDir,
+                           arr = np.ndarray((1738, 256, 256, 3), dtype = 'float32')), loadNumpyArrays(
+            folderPath = testingMaskDir,
+            arr = np.ndarray((1738, 256, 256, 1), dtype = 'float32'))
+
+
+def Normalize(data, mean_data = None, std_data = None):
+    if not mean_data:
+        mean_data = np.mean(data)
+    if not std_data:
+        std_data = np.std(data)
+    norm_data = (data - mean_data) / std_data
+    return norm_data, mean_data, std_data
+
+
+def __saveDatasetArraysForNet(folderPath: str, suffix: str, data: np.ndarray):
+    for i in range(len(data)):
+        index = i + 1
+        path = folderPath + suffix + '__' + str(index) + '.npy'
+        if not os.path.exists(folderPath):
+            os.makedirs(folderPath)
+        np.save(file = path, arr = data[i])
+
+
+def saveDatasetArraysForNet():
+    imgs_train, imgs_mask_train, imgs_val, imgs_mask_val, imgs_test, imgs_mask_test_gt = getDatasetForNet()
+
+    mean = np.mean(imgs_train)  # mean for data centering
+    std = np.std(imgs_train)  # std for data normalization
+
+    imgs_train = imgs_train.astype('float32')
+    # imgs_train -= mean
+    # imgs_train /= std
+    # imgs_train /= 255.
+
+    imgs_mask_train = imgs_mask_train.astype('float32')
+    imgs_mask_train /= 255.  # scale masks to [0, 1]
+    imgs_mask_train = (imgs_mask_train > 0.5).astype(np.uint8)
+    imgs_mask_train = imgs_mask_train[..., np.newaxis]
+
+    imgs_test = imgs_test.astype('float32')
+    # imgs_test -= mean
+    # imgs_test /= std
+    # imgs_test /= 255.
+
+    imgs_mask_test_gt = imgs_mask_test_gt.astype('float32')
+    imgs_mask_test_gt /= 255.  # scale masks to [0, 1]
+    imgs_mask_test_gt = (imgs_mask_test_gt > 0.5).astype(np.uint8)
+    imgs_mask_test_gt = imgs_mask_test_gt[..., np.newaxis]
+
+    imgs_val = imgs_val.astype('float32')
+    # imgs_val -= mean
+    # imgs_val /=std
+    # imgs_val /= 255.
+
+    imgs_mask_val = imgs_mask_val.astype('float32')
+    imgs_mask_val /= 255.  # scale masks to [0, 1]
+    imgs_mask_val = (imgs_mask_val > 0.5).astype(np.uint8)
+    imgs_mask_val = imgs_mask_val[..., np.newaxis]
+
+    print("go")
+
+    __saveDatasetArraysForNet(folderPath = "../CBIS/Dataset-split-arrays/Testing-Final-IMG-Arrays/",
+                              suffix = "testing_img_array", data = imgs_test)
+    __saveDatasetArraysForNet(folderPath = "../CBIS/Dataset-split-arrays/Testing-Final-MSK-Arrays/",
+                              suffix = "testing_msk_array", data = imgs_mask_test_gt)
+
+    __saveDatasetArraysForNet(folderPath = "../CBIS/Dataset-split-arrays/Training-Final-IMG-Arrayss/",
+                              suffix = "training_img_array", data = imgs_train)
+    __saveDatasetArraysForNet(folderPath = "../CBIS/Dataset-split-arrays/Training-Final-MSK-Arrays/",
+                              suffix = "training_msk_array", data = imgs_mask_train)
+
+    __saveDatasetArraysForNet(folderPath = "../CBIS/Dataset-split-arrays/Validation-Final-IMG-Arrays/",
+                              suffix = "validation_img_array", data = imgs_val)
+    __saveDatasetArraysForNet(folderPath = "../CBIS/Dataset-split-arrays/Validation-Final-MSK-Arrays/",
+                              suffix = "validation_msk_array", data = imgs_mask_val)
+
+
 if __name__ == '__main__':
     # 12:23
-    routineMakeFinalDataset()
+    # routineMakeFinalDataset()
+    saveDatasetArraysForNet()
+
+    # BCDR -> 485
+    # CBIS calc -> 1505
+    # CBIS mass -> 1592
+    # csaw -> 339
+    # inbreast -> 118
+    # total : 3.939
+
+    # INBREAST, CBIS CALC, BCDR, CSAW

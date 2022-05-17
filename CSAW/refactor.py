@@ -3,10 +3,6 @@ import os
 import shutil
 import re
 
-import cv2
-from PIL import Image
-import numpy as np
-
 
 def _moveOriginalCSAWImages(origin_folder: str, target_folder: str, regex: str, filenameSuffix: str = None,
                             index = None):
@@ -56,7 +52,6 @@ def _moveOriginalCSAWImages(origin_folder: str, target_folder: str, regex: str, 
 
     return index
 
-
 def moveCSAWImages(origin_folder: str, target_folder: str, mode, file_index: int, file_name_suffix):
     if mode == "images":
         regex = [".*_[0-9].png", ".*_[0-9][0-9].png"]
@@ -78,7 +73,6 @@ def moveCSAWImages(origin_folder: str, target_folder: str, mode, file_index: int
 
     return file_index_updated
 
-
 def _routineRefactorCSAW(origin_folder, target_folder, mode, file_index, file_name_suffix):
     for dirPath, dirNames, _ in os.walk(origin_folder):
 
@@ -93,7 +87,6 @@ def _routineRefactorCSAW(origin_folder, target_folder, mode, file_index, file_na
                                         file_name_suffix = file_name_suffix)
 
     return file_index
-
 
 def refactorCSAW():
     file_index = 1
@@ -115,7 +108,7 @@ def refactorCSAW():
     targetMammaryGlandMsksSuffix = "Mammary-gland-"
 
     for dir in [targetImgsFolder, targetMsksFolder, targetMammaryGlandMsksFolder]:
-        shutil.rmtree(dir)
+        shutil.rmtree(dir, ignore_errors = True)
         os.makedirs(dir)
 
     file_index = _routineRefactorCSAW(origin_folder = originalTestingIMGFolder,

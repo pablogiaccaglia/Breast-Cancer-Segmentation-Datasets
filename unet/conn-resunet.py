@@ -17,13 +17,13 @@ from keras import optimizers
 import matplotlib.pyplot as plt
 from preprocessing import utils
 import tensorflow as tf
+from utils import *
 
-tf.random.set_seed(
-        42
-)
+tf.random.set_seed('seed')
 
 K.set_image_data_format('channels_last')  # TF dimension ordering in this code
 
+"""
 # identify GPU
 device_name = tf.test.gpu_device_name()
 if not tf.config.list_physical_devices('GPU'):
@@ -33,59 +33,10 @@ print('Found GPU at: {}'.format(device_name))
 gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction = 0.75)
 sess = tf.compat.v1.Session(config = tf.compat.v1.ConfigProto(gpu_options = gpu_options))
 tf.compat.v1.keras.backend.set_session(sess)
+"""
 
 img_rows = 256
 img_cols = 256
-smooth = 1.
-
-
-def dice_coef(y_true, y_pred):
-    y_true_f = K.flatten(y_true)
-    y_pred_f = K.flatten(y_pred)
-    intersection = K.sum(y_true_f * y_pred_f)
-    return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
-
-
-def iou_coef(y_true, y_pred, smooth = 1):
-    intersection = K.sum(K.abs(y_true * y_pred), axis = [1, 2, 3])
-    union = K.sum(y_true, [1, 2, 3]) + K.sum(y_pred, [1, 2, 3]) - intersection
-    iou = K.mean((intersection + smooth) / (union + smooth), axis = 0)
-    return iou
-
-
-def dice_coef_loss(y_true, y_pred):
-    return -dice_coef(y_true, y_pred)
-
-
-def focal_loss(y_true, y_pred):
-    y_true_f = K.flatten(y_true)
-    y_pred_f = K.flatten(y_pred)
-    BCE = K.binary_crossentropy(y_true_f, y_pred_f)
-    BCE_EXP = K.exp(-BCE)
-    focal_loss = K.mean(0.8 * K.pow((1 - BCE_EXP), 2.) * BCE)
-    return focal_loss
-
-
-def loss(y_true, y_pred):
-    return -(0.4 * dice_coef(y_true, y_pred) + 0.6 * iou_coef(y_true, y_pred))
-
-
-def aspp_block(x, num_filters, rate_scale = 1):
-    x1 = Conv2D(num_filters, (3, 3), dilation_rate = (6 * rate_scale, 6 * rate_scale), padding = "same")(x)
-    x1 = BatchNormalization()(x1)
-
-    x2 = Conv2D(num_filters, (3, 3), dilation_rate = (12 * rate_scale, 12 * rate_scale), padding = "same")(x)
-    x2 = BatchNormalization()(x2)
-
-    x3 = Conv2D(num_filters, (3, 3), dilation_rate = (18 * rate_scale, 18 * rate_scale), padding = "same")(x)
-    x3 = BatchNormalization()(x3)
-
-    x4 = Conv2D(num_filters, (3, 3), padding = "same")(x)
-    x4 = BatchNormalization()(x4)
-
-    y = Add()([x1, x2, x3, x4])
-    y = Conv2D(num_filters, (1, 1), padding = "same")(y)
-    return y
 
 
 def squeeze_excite_block(inputs, ratio = 8):
@@ -109,6 +60,7 @@ def resnet_block(x, n_filter, strides = 1):
     ## Conv 1
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
+
     x = Conv2D(n_filter, (3, 3), padding = "same", strides = strides)(x)
     ## Conv 2
     x = BatchNormalization()(x)
@@ -205,7 +157,7 @@ def main():
     name = 'mydata'
 
     # fname = 'rwnet_cbis_join_weights.h5'
-    fname = 'unet/' + name + '_weights.h5'
+    fname = '../unet/' + name + '_weights.h5'
     pred_dir = fname[:-11]
 
     model_checkpoint = ModelCheckpoint(fname, monitor = 'val_loss', verbose = 1, save_best_only = True)
@@ -214,18 +166,7 @@ def main():
     print('Fitting model...')
     print('-' * 30)
 
-    imgs_train, imgs_val, imgs_mask_train, imgs_mask_val, imgs_test, imgs_mask_test_gt = utils.getDatasetForNet()
-
-    imgs_train = imgs_train.astype('float32')
-    mean = np.mean(imgs_train)  # mean for data centering
-    std = np.std(imgs_train)  # std for data normalization
-
-    imgs_mask_train -= mean
-    imgs_mask_train /= std
-    imgs_mask_train = imgs_mask_train.astype('float32')
-
-    imgs_mask_train /= 255.  # scale masks to [0, 1]
-    imgs_mask_train = imgs_mask_train[..., np.newaxis]
+    imgs_train, imgs_mask_train, imgs_val, imgs_mask_val, imgs_test, imgs_mask_test_gt = utils.getDatasetArraysForNet()
 
     history = model.fit(imgs_train, imgs_mask_train, batch_size = 8, epochs = 100, verbose = 1,
                         callbacks = [model_checkpoint],
@@ -235,10 +176,6 @@ def main():
     print('-' * 30)
     print('Loading and preprocessing test data...')
     print('-' * 30)
-
-    imgs_test = imgs_test.astype('float32')
-    imgs_test -= mean
-    imgs_test /= std
 
     print('-' * 30)
     print('Loading saved weights...')
@@ -285,10 +222,6 @@ def main():
         imsave(os.path.join(pred_dir, files[idx] + '_pred.png'), image)
         idx = idx + 1
 
-    imgs_mask_test_gt = imgs_mask_test_gt.astype('float32')
-    imgs_mask_test_gt = imgs_mask_test_gt[..., np.newaxis]
-    imgs_mask_test_gt = imgs_mask_test_gt // 255
-
     ev = model.evaluate(imgs_test, imgs_mask_test_gt)
     dice, iou = ev[1], ev[2]
 
@@ -305,16 +238,16 @@ def main():
 
     plt.plot(history.history['dice_coef'])
     plt.plot(history.history['val_dice_coef'])
-    plt.title('model dice coef')
-    plt.ylabel('dice coef')
+    plt.title('model dice coefficients')
+    plt.ylabel('dice coefficients')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc = 'upper left')
     plt.show()
 
     plt.plot(history.history['iou_coef'])
     plt.plot(history.history['val_iou_coef'])
-    plt.title('model iou coef')
-    plt.ylabel('iou coef')
+    plt.title('model iou coefficients')
+    plt.ylabel('iou coefficients')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc = 'upper left')
     plt.show()

@@ -423,7 +423,7 @@ def updateDcmPath(logger, og_df, images_folder, masks_folder):
         del og_df["ROI_mask_file_path"]
 
     except Exception as e:
-        # logger.error(f'Unable to updateDcmPath!\n{e}')
+        raise e
         print(f"Unable to get updateDcmPath!\n{e}")
 
     return og_df
@@ -504,7 +504,7 @@ def updateCSV(logger, mass_csv_path, mass_png_folder, masks_folder, output_csv_p
     logger : {logging.Logger}
         The logger used for logging error information
     resultsDict: {dict}
-        A dintionary containing information about the
+        A dictionary containing information about the
         command line arguments. These can be used for
         overwriting command line arguments as needed.
     """
@@ -523,31 +523,12 @@ def updateCSV(logger, mass_csv_path, mass_png_folder, masks_folder, output_csv_p
 
     updated_mass_df.to_csv(output_csv_path, index = False)
 
-    print("Getting out of updateDcmPath.")
+    print("Getting out of updateCSV.")
     print("-" * 30)
 
     return
 
 
-# 10223
 if __name__ == '__main__':
-    """
     refactorCBIS(logger = None,
-                 topDirectory = "CBIS/manifest-ZkhPvrLo5216730872708713142/CBIS-DDSM")
-ds = pydicom.filereader.dcmread(
-        "CBIS/manifest-ZkhPvrLo5216730872708713142/CBIS-DDSM/P_01867_LEFT_MLO_MASK_2___a.dcm")
-print(ds)
-
-ds = pydicom.filereader.dcmread(
-        "CBIS/manifest-ZkhPvrLo5216730872708713142/CBIS-DDSM/P_00038_RIGHT_MLO_FULL.dcm")
-print(ds)
- 
-    """
-    mass_csv_path = "CBIS/mass_case_description_train_set.csv"
-    mass_png_folder = "CBIS/intermediate/CBIS-Original-Training-Preprocessed-IMG"
-    output_csv_path = "/CBIS/mass_case_description_train_set_UPDATED.csv"
-    masks_folder = "CBIS/intermediate/CBIS-Original-Training-Preprocessed-MSK"
-
-    updateCSV(logger = None, mass_csv_path = mass_csv_path, mass_png_folder = mass_png_folder,
-              masks_folder = masks_folder,
-              output_csv_path = output_csv_path)
+                 topDirectory = "/Users/pablo/Desktop/CBIS/manifest-ZkhPvrLo5216730872708713142")
