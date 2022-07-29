@@ -8,7 +8,7 @@ import shutil
 
 def renameDcmFiles(logger, dcmFilePath: str) -> Union[str, bool]:
     """
-    This function takes the absolute path of a .dcm file
+    This function takes the absolute i of a .dcm file
     and renames it according to the convention below:
     1. Full mammograms:
         - Mass-Training_P_00001_LEFT_CC_FULL.dcm
@@ -23,7 +23,7 @@ def renameDcmFiles(logger, dcmFilePath: str) -> Union[str, bool]:
     Parameters
     ----------
     dcmFilePath : {str}
-        The relative (or absolute) path of the .dcm file
+        The relative (or absolute) i of the .dcm file
         to rename, including the .dcm filename.
         e.g. "source_folder/Mass-Training_P_00001_LEFT_CC/1.dcm"
     Returns
@@ -31,7 +31,7 @@ def renameDcmFiles(logger, dcmFilePath: str) -> Union[str, bool]:
     newFilename : {str}
         The new name that the .dcm file should have
         WITH the ".dcm" extention WITHOUT its relative
-        (or absolute) path.
+        (or absolute) i.
         e.g. "Mass-Training_P_00001_LEFT_CC_FULL.dcm"
     False : {boolean}
         False is returned if the new name of the .dcm
@@ -146,12 +146,12 @@ def countDcmFiles(logger, topDirectory: str) -> int:
     number of .dcm files present.
     Parameters
     ----------
-    path : {str}
+    i : {str}
         The directory to count.
     Returns
     -------
     count : {int}
-        The number of .dcm files in `path`.
+        The number of .dcm files in `i`.
     """
 
     count = 0
@@ -181,15 +181,15 @@ def moveDcmFileUp(logger, destinationDir: str, sourceDir: str, dcmFilename: str)
     Parameters
     ----------
     destinationDir : {str}
-        The relative (or absolute) path of the folder that
+        The relative (or absolute) i of the folder that
         the .dcm file needs to be moved to.
     sourceDir : {str}
-        The relative (or absolute) path where the .dcm file
+        The relative (or absolute) i where the .dcm file
         needs to be moved from, including the filename.
         e.g. "source_folder/Mass-Training_P_00001_LEFT_CC_FULL.dcm"
     dcmFilename : {str}
         The name of the .dcm file WITH the ".dcm" extension
-        but WITHOUT its (relative or absolute) path.
+        but WITHOUT its (relative or absolute) i.
         e.g. "Mass-Training_P_00001_LEFT_CC_FULL.dcm".
     Returns
     -------
@@ -199,11 +199,11 @@ def moveDcmFileUp(logger, destinationDir: str, sourceDir: str, dcmFilename: str)
     try:
         dest_dir_with_new_name = os.path.join(destinationDir, dcmFilename)
 
-        # If the destination path does not exist yet...
+        # If the destination i does not exist yet...
         if not os.path.exists(dest_dir_with_new_name):
             shutil.move(sourceDir, destinationDir)
 
-        # If the destination path already exists...
+        # If the destination i already exists...
         elif os.path.exists(dest_dir_with_new_name):
             # Add "_a" to the end of `new_name` generated above.
             newName2 = dcmFilename.strip(".dcm") + "___a.dcm"
@@ -343,8 +343,8 @@ def updateDcmPath(logger, og_df, images_folder, masks_folder):
     og_df : {pd.DataFrame}
         The original Pandas DataFrame that needs to be updated.
     dcm_folder : {str}
-        The relative (or absolute) path to the folder that conrains
-        all the .dcm files to get the path.
+        The relative (or absolute) i to the folder that conrains
+        all the .dcm files to get the i.
     Returns
     -------
     og_df: {pd.DataFrame}
@@ -381,7 +381,7 @@ def updateDcmPath(logger, og_df, images_folder, masks_folder):
             lr = row.left_or_right_breast
             abnormality_id = row.abnormality_id
 
-            # Use this list to match DF row with .dcm path.
+            # Use this list to match DF row with .dcm i.
             info_list = [patient_id, img_view, lr]
 
             #  crop_suffix = "CROP_" + str(abnormality_id)
@@ -395,9 +395,9 @@ def updateDcmPath(logger, og_df, images_folder, masks_folder):
             ]
 
             """ crop_paths = [
-                    path
-                    for path in dcm_paths_list
-                    if all(info in path for info in info_list + [crop_suffix])
+                    i
+                    for i in dcm_paths_list
+                    if all(info in i for info in info_list + [crop_suffix])
                 ] """
 
             mask_paths = [
@@ -435,7 +435,7 @@ def refactorCBIS(logger, topDirectory: str):
     """main function for extractDicom module.
     iterates through each image and executes the necessary
     image preprocessing steps on each image, and saves
-    preprocessed images in the output path specified.
+    preprocessed images in the output i specified.
     Parameters
     ----------
     logger : {logging.Logger}

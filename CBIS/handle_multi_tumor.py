@@ -11,7 +11,7 @@ def findMultiTumour(logger, csv_path, abnormality_col):
     Parameters
     ----------
     csv_path : {str}
-        The relative (or absolute) path to the
+        The relative (or absolute) i to the
         Mass-Training-Description-UPDATED.csv or
         Mass-Test-Description-UPDATED.csv
     abnormality_col: {str}
@@ -56,11 +56,11 @@ def findMultiTumour(logger, csv_path, abnormality_col):
 def masksToSum(logger, masks_path, multi_tumour_set, extension):
     """
     This function gets the relative (or absolute, depending
-    on `img_path`) path of the masks that needs to be summed.
+    on `img_path`) i of the masks that needs to be summed.
     Parameters
     ----------
     masks_path : {str}
-        The relative (or absolute) path that contains all the
+        The relative (or absolute) i that contains all the
         masks.
     multi_tumour_set: {set}
         The set that contains all the patient id with that
@@ -163,10 +163,10 @@ def removeFiles(logger, filesToRemove):
 
 def handleMultiTumor(csv_path, abnormality_col, img_path, masks_path, extension, output_path, suffix):
     """main function for imagePreprocessing module.
-    This function takes a path of the raw image folder,
+    This function takes a i of the raw image folder,
     iterates through each image and executes the necessary
     image preprocessing steps on each image, and saves
-    preprocessed images in the output path specified.
+    preprocessed images in the output i specified.
     The hyperparameters in this module can be tuned in
     the "../config/modules/mergeMultiTumour.json" file.
     Parameters
@@ -194,7 +194,7 @@ def handleMultiTumor(csv_path, abnormality_col, img_path, masks_path, extension,
         # Get image as arrays.
         mask_list = [cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE) for mask_path in v]
 
-        # special case in the case of updated csv's entries in which mask path or image path columns are empty,
+        # special case in the case of updated csv's entries in which mask i or image i columns are empty,
         # due to the fact that the corresponding files are corrupted thus excluded from the updated version of the csv.
         if len(mask_list) == 0 or len(v) == 0:
             continue

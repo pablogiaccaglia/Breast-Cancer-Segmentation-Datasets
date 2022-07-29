@@ -13,13 +13,13 @@ def _moveOriginalCSAWImages(origin_folder: str, target_folder: str, regex: str, 
     if not regex:
         return
 
-    # Define path to all png files in the folder
+    # Define i to all png files in the folder
     path = origin_folder + "/*.png"
 
     # Create list with addresses of all files in the folder
     addrs = sorted(glob.glob(path))
 
-    # Get screenings path
+    # Get screenings i
     if regex[0] == 'cancer.png' or regex[0] == "mammary_gland.png":
         image_list = [i for i in addrs if regex[0] in i]
         number_of_images = len(image_list)

@@ -65,18 +65,13 @@ def removeBenignAcquisitions(dicomFilenames, csvFilePath, xmlFiles):
 
     dicomFilenames.sort()
     xmlFiles.sort()
-    print(len(dicomFilenames))
-    print(len(xmlFiles))
 
     reducedFileNames = []
     reducedXMLFileNames = []
     for i in range(len(xmlFiles)):
         if columns[i][1] != '1':
             reducedFileNames.append(dicomFilenames[i])
-            reducedXMLFileNames.append(xmlFiles[i])  # this is actually useless...
-
-    print(len(reducedFileNames))
-    print(len(reducedXMLFileNames))
+            reducedXMLFileNames.append(xmlFiles[i])
 
     return reducedFileNames, reducedXMLFileNames
 

@@ -141,7 +141,7 @@ def randomContrast(image: np.ndarray) -> dict:
     augmented = aug(image = image)
     return augmented
 
-def augment(image: np.ndarray, mask: np.ndarray, targetSize: int = 224) -> tuple:
+def augment(image: np.ndarray, mask: np.ndarray, targetSize: int = 256) -> tuple:
 
     try:
         height, width, c = image.shape
@@ -228,8 +228,6 @@ def pad(img: np.ndarray, logger = None, dtype = np.float64) -> np.ndarray:
             # pad.
             paddedImg = np.zeros(shape = targetShape, dtype=dtype)
             paddedImg[:nRows, :nCols] = img
-
-
 
     except Exception as e:
         # logger.error(f'Unable to pad!\n{e}')

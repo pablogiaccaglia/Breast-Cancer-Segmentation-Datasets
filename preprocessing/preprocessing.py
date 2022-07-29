@@ -8,11 +8,70 @@ import pydicom
 from patchify import patchify
 from skimage.exposure import equalize_adapthist
 
-from CBIS.refactor import updateCSV
+from CBIS.refactorCBIS import updateCSV
 from CBIS import handle_multi_tumor
 from INbreast.refactor import removeBenignAcquisitions, loadInbreastMask
 
 from augmentations import pad, padInverted
+
+
+def cropImageAroundBreast(image,
+                          mask = None,
+                          doAdditionalCrop = False,
+                          reconstructMode = False):
+    # Get all hyperparameters.
+    thresh = 0.1
+    maxValue = 1.0
+    i1 = np.uint8(23)
+    kSize = i1
+    operation = "open"
+    reverse = True
+    topXContours = 1
+
+    # Step 3: Remove artefacts.
+    # i = image[:, :, 0]
+    binarizedImage = globalBinarize(logger = None, img = image, thresh = thresh, maxval = maxValue)
+
+    editedMask = editMask(
+            logger = None, mask = binarizedImage, ksize = (kSize, kSize), operation = operation
+    )
+    _, xLargestMask = selectXLargestBlobs(logger = None, mask = editedMask, topXContours = topXContours,
+                                          reverse = reverse)
+    # cv2.imwrite(
+    # "../data/preprocessed/Mass/testing/xLargest_mask.png", xLargestMask
+    # )
+    # maskedImage = applyMask(logger = logger, img = croppedImage, mask = xLargestMask)
+    # cv2.imwrite("../data/preprocessed/Mass/testing/maskedImage.png", maskedImage)
+    x, y, z, q = cv2.boundingRect(xLargestMask)
+
+    image = image[y:q, x:z]
+
+    if np.any(mask):
+        mask = mask[y:q, x:z]
+
+    if np.any(mask):
+        if doAdditionalCrop:
+            if reconstructMode:
+                image, mask, vertical, mat1, mat2 = cropImage(imag = image, mas = mask, doPad = False,
+                                                              reconstructMode = reconstructMode)
+                return image, mask, x, vertical, mat1, mat2 + mat1 + y
+
+            else:
+                image, mask, _ = cropImage(imag = image, mas = mask, doPad = False)
+
+        return image, mask
+
+    else:
+        if doAdditionalCrop:
+            if reconstructMode:
+                image, _, vertical, mat1, mat2 = cropImage(imag = image, mas = None, doPad = False,
+                                                           reconstructMode = reconstructMode)
+                return image, _, x, vertical, mat1, mat2 + mat1 + y
+
+            else:
+                image, _ = cropImage(imag = image, mas = None, doPad = False)
+
+        return image, mask
 
 
 def getMaskPatch(img, msk, getBothPatches = False):
@@ -33,6 +92,8 @@ def getMaskPatch(img, msk, getBothPatches = False):
         msk = msk / 255
     if msk.sum() < 10000:
         multiplier = 4
+
+    multiplier = 4  # TODO check if it is right to have different multipliers
 
     x, y, z, q = return_box(x, x + w, y, y + h, multiplier)
     # ima = cv2.rectangle(img, (x, y), (z, q), (0, 255, 0), 2)
@@ -62,60 +123,82 @@ def getMaskPatch(img, msk, getBothPatches = False):
 
 
 def getPatches(img, width, height, channels, step):
-    patches_img = patchify(img, (width, height, channels), step = step)  # Step=256 for 256 patches means no overlap
+    if channels is not None:
+        patches_img = patchify(img, (width, height, channels),
+                               step = step)  # example = Step=256 for 256 patches means no overlap
+    else:
+        patches_img = patchify(img, (width, height),
+                               step = step)  # example = Step=256 for 256 patches means no overlap
 
     p = []
 
     for i in range(patches_img.shape[0]):
         for j in range(patches_img.shape[1]):
-            p.append(patches_img[i][j][0])
+            p.append(patches_img[i][j])
 
-    return p
+    return p, patches_img.shape
+
+
+def cropImage(imag,
+              mas = None,
+              doPad = True,
+              reconstructMode = False):
+    rows = imag.shape[0]
+    columns = imag.shape[1]
+    mat = None
+    newMsk = None
+    for i in range(columns - 1, 0, -1):
+        value = np.sum(imag[:, i])
+        if value > 6000:
+            mat = i
+            break
+
+    vertical = mat
+
+    newIm = imag[:, :vertical]
+
+    if np.any(mas):
+        newMsk = mas[:, :vertical]
+
+    mat1 = None
+    for i in range(0, rows):
+        value = np.sum(newIm[i, :])
+        if value > 20000:
+            mat1 = i
+            break
+
+    newIm = newIm[mat1:, ]
+
+    if np.any(mas):
+        newMsk = newMsk[mat1:, ]
+
+    rows = newIm.shape[0]
+    mat2 = None
+    for i in range(rows - 1, 0, -1):
+        value = np.sum(newIm[i, :])
+        if value > 20000:
+            mat2 = i
+            break
+
+    newIm = newIm[:mat2, ]
+
+    if np.any(mas):
+        newMsk = newMsk[:mat2, ]
+
+    newIm = newIm
+
+    if doPad:
+        newIm = pad(logger = None, img = newIm, dtype = np.uint8)
+        if np.any(mas):
+            newMsk = pad(logger = None, img = newMsk, dtype = np.uint8)
+
+    if reconstructMode:
+        return newIm, newMsk, vertical, mat1, mat2
+    else:
+        return newIm, newMsk, vertical
 
 
 def routineZoomImages(image, mask):
-    def cropImage(imag, mas):
-        rows = imag.shape[0]
-        columns = imag.shape[1]
-        mat = None
-        for i in range(columns - 1, 0, -1):
-            value = np.sum(imag[:, i])
-            if value > 300:
-                mat = i
-                break
-
-        vertical = mat
-
-        newIm = imag[:, :vertical]
-        newMsk = mas[:, :vertical]
-
-        mat = None
-        for i in range(0, rows):
-            value = np.sum(newIm[i, :])
-            if value > 8000:
-                mat = i
-                break
-
-        newIm = newIm[mat:, ]
-        newMsk = newMsk[mat:, ]
-
-        rows = newIm.shape[0]
-        mat = None
-        for i in range(rows - 1, 0, -1):
-            value = np.sum(newIm[i, :])
-            if value > 8000:
-                mat = i
-                break
-
-        newIm = newIm[:mat, ]
-        newMsk = newMsk[:mat, ]
-        newIm = newIm
-
-        newIm = pad(logger = None, img = newIm, dtype = np.uint8)
-        newMsk = pad(logger = None, img = newMsk, dtype = np.uint8)
-
-        return newIm, newMsk, vertical
-
     # image = image[:,:,0]
     # mask = mask[:,:,0]
     image, mask, vertical = cropImage(image, mask)
@@ -168,7 +251,8 @@ def cropBorders(logger, img,
                 left: Union[float, int] = 0.01,
                 right: Union[float, int] = 0.01,
                 up: Union[float, int] = 0.04,
-                down: Union[float, int] = 0.04) -> np.ndarray:
+                down: Union[float, int] = 0.04,
+                reverseInfo: bool = False):
     """
     This function crops a specified percentage of border from
     each side of the given image. Default is 1% from the topDirectory,
@@ -200,7 +284,10 @@ def cropBorders(logger, img,
         # logger.error(f'Unable to cropBorders!\n{e}')
         print(f"Unable to get cropBorders!\n{e}")
 
-    return croppedImg
+    if reverseInfo:
+        return croppedImg, leftCrop, rightCrop, upCrop, downCrop
+    else:
+        return croppedImg
 
 
 def minMaxNormalize(logger, img: np.ndarray) -> np.ndarray:
@@ -517,6 +604,7 @@ def fullMammoPreprocess(
         topXContours: int,
         mode: str,
         mammMask: np.ndarray = None,
+        reverseInfo: bool = False
 ) -> tuple:
     """
     This function chains and executes all the preprocessing
@@ -551,17 +639,32 @@ def fullMammoPreprocess(
             img = applyMask(logger = logger, img = img, mask = binarizedMask)
 
         # Step 1: Initial crop.
-        croppedImage = cropBorders(logger = logger, img = img, left = left, right = right, down = down, up = up)
+        if reverseInfo:
+            croppedImage, leftCrop, rightCrop, upCrop, downCrop = cropBorders(logger = logger,
+                                                                              img = img,
+                                                                              left = left,
+                                                                              right = right,
+                                                                              down = down,
+                                                                              up = up,
+                                                                              reverseInfo = reverseInfo)
+        else:
+            croppedImage = cropBorders(logger = logger,
+                                       img = img,
+                                       left = left,
+                                       right = right,
+                                       down = down,
+                                       up = up,
+                                       reverseInfo = reverseInfo)
 
         # cv2.imwrite("../data/preprocessed/Mass/testing/cropped.png", croppedImage)
 
         # Step 2: Min-max normalize.
-        # normalizedImage = minMaxNormalize(logger = logger, img = croppedImage)
+        normalizedImage = minMaxNormalize(logger = logger, img = croppedImage)
         # cv2.imwrite("../data/preprocessed/Mass/testing/normed.png", normalizedImage)
 
         if mode == 'cbis':
             # Step 3: Remove artefacts.
-            binarizedImage = globalBinarize(logger = logger, img = croppedImage, thresh = thresh, maxval = maxval)
+            binarizedImage = globalBinarize(logger = logger, img = normalizedImage, thresh = thresh, maxval = maxval)
             editedMask = editMask(
                     logger = logger, mask = binarizedImage, ksize = (ksize, ksize), operation = operation
             )
@@ -570,8 +673,10 @@ def fullMammoPreprocess(
             # cv2.imwrite(
             # "../data/preprocessed/Mass/testing/xLargest_mask.png", xLargestMask
             # )
+
             maskedImage = applyMask(logger = logger, img = croppedImage, mask = xLargestMask)
             # cv2.imwrite("../data/preprocessed/Mass/testing/maskedImage.png", maskedImage)
+
 
         else:
             xLargestMask = croppedImage
@@ -589,8 +694,11 @@ def fullMammoPreprocess(
         # Step 5: CLAHE enhancement.
         if mode == 'cbis':  # CLAHE not needed for CSAW images!
             claheImage = equalize_adapthist(flippedImage)
+            # claheImage = flippedImage
+
         else:
             claheImage = flippedImage
+
         # cv2.imwrite("../data/preprocessed/Mass/testing/claheImage.png", claheImage)
 
         # Step 6: pad.
@@ -617,7 +725,12 @@ def fullMammoPreprocess(
         # logger.error(f'Unable to fullMammPreprocess!\n{e}')
         print(f"Unable to fullMammPreprocess!\n{e}")
 
-    return paddedImage, toLRFlip
+    if reverseInfo:
+        return paddedImage, toLRFlip, croppedImage.shape[0], croppedImage.shape[
+            1], leftCrop, rightCrop, upCrop, downCrop
+
+    else:
+        return paddedImage, toLRFlip
 
 
 def maskPreprocess(logger, mask: np.ndarray, toLRFlip: bool) -> np.ndarray:
@@ -650,7 +763,6 @@ def maskPreprocess(logger, mask: np.ndarray, toLRFlip: bool) -> np.ndarray:
 
     # Step 3: Pad.
     maskPreprocessed = pad(logger = logger, img = mask)
-
 
     # Step 4: Downsample.
 
@@ -692,7 +804,7 @@ def sumMasks(logger, mask_list):
 
 def CBISPreprocessing(logger, imagesPath: str, outputImagesPath: str, outputMasksPath: str, suffix: str):
     """main function for imagePreprocessing module.
-    This function takes a path of the raw image folder,
+    This function takes a i of the raw image folder,
     iterates through each image and executes the necessary
     image preprocessing steps on each image, and saves
     preprocessed images (in the specified file extension)
@@ -746,7 +858,7 @@ def CBISPreprocessing(logger, imagesPath: str, outputImagesPath: str, outputMask
         # sanity check for masks, some calc mask dcm files are corrupted,
         # so we ignore these entries
 
-        # Get the path of corresponding ROI mask(s) .dcm file(s).
+        # Get the i of corresponding ROI mask(s) .dcm file(s).
         maskImagePath = [mp for mp in masksPaths if patientID in mp]
         maskArrays = []
         maskImagesPathUpdated = []
@@ -823,8 +935,7 @@ def CBISPreprocessing(logger, imagesPath: str, outputImagesPath: str, outputMask
 
         savedFilePath = os.path.join(outputImagesPath, savedFilename)
 
-        cv2.imwrite(savedFilePath, fullMammPreprocessed)
-        # print(f"DONE FULL: {fullMammPath}")
+        shape = 0
 
         for maskArray, mp in zip(maskArrays, maskImagePath):
             # Preprocess.
@@ -838,10 +949,22 @@ def CBISPreprocessing(logger, imagesPath: str, outputImagesPath: str, outputMask
             if suffix not in savedFilename:
                 savedFilename = suffix + savedFilename
 
-            savedFilePath = os.path.join(outputMasksPath, savedFilename)
-            cv2.imwrite(savedFilePath, mask_pre)
+            savedFilePathMask = os.path.join(outputMasksPath, savedFilename)
+
+            s1 = min(fullMammPreprocessed.shape[0], mask_pre.shape[0])
+            s2 = min(mask_pre.shape[1], fullMammPreprocessed.shape[1])
+
+            shape = min(s1, s2)
+
+            mask_pre = cv2.resize(mask_pre, (shape, shape))
+
+            cv2.imwrite(savedFilePathMask, mask_pre)
 
         #  print(f"DONE MASK: {mp}")
+
+        fullMammPreprocessed = cv2.resize(fullMammPreprocessed, (shape, shape))
+        cv2.imwrite(savedFilePath, fullMammPreprocessed)
+        # print(f"DONE FULL: {fullMammPath}")
 
 
 def getListOfFiles(dirPath: str, extension: str) -> list:
@@ -939,7 +1062,7 @@ def CSAWPreprocessing(logger, imagesPath: str, masksPath: str, mammGlandMasksPat
         # Preprocess Corresponding Mask(s)
         # ================================
 
-        # Get the path of corresponding ROI mask(s) .dcm file(s).
+        # Get the i of corresponding ROI mask(s) .dcm file(s).
 
         masksPathsList = [i for i in masksPaths if i.split('-')[-1] == mammID]
 
@@ -1000,6 +1123,93 @@ def __CBISParametricRoutine(dcmFolder: str,
     copy_tree(originalPreprocessedMSKFolderPath, completePreprocessedMSKFolderPath)
 
 
+def _cropImagesRoutine(i, m = None, reconstructMode = False, doAdditionalCrop = True):
+    if np.any(m):
+        s1 = min(i.shape[0], m.shape[0])
+        s2 = min(i.shape[1], m.shape[1])
+
+        shape = min(s1, s2)
+
+        m = cv2.resize(m, (shape, shape))
+        i = cv2.resize(i, (shape, shape))
+
+    if np.any(m):
+        print(m.shape)
+
+    if reconstructMode:
+        if doAdditionalCrop:
+            i, m, x, z, y, q = cropImageAroundBreast(
+                    image = i,
+                    mask = m,
+                    doAdditionalCrop = doAdditionalCrop,
+                    reconstructMode = reconstructMode)
+        else:
+            i, m = cropImageAroundBreast(
+                    image = i,
+                    mask = m,
+                    doAdditionalCrop = doAdditionalCrop,
+                    reconstructMode = reconstructMode)
+
+
+    else:
+        i, m = cropImageAroundBreast(image = i,
+                                     mask = m,
+                                     doAdditionalCrop = doAdditionalCrop)
+
+    if np.any(m):
+        if reconstructMode:
+            i1, leftCrop, rightCrop, upCrop, downCrop = cropBorders(logger = None, img = i,
+                                                                    reverseInfo = reconstructMode)
+            m = cropBorders(logger = None, img = m)
+            return i1, m, leftCrop, rightCrop, upCrop, downCrop, x, z, y, q, i.shape[0], i.shape[1]
+        else:
+            i = cropBorders(logger = None, img = i)
+            m = cropBorders(logger = None, img = m)
+            return i, m
+
+
+    else:
+        if reconstructMode:
+            i1, leftCrop, rightCrop, upCrop, downCrop = cropBorders(logger = None, img = i,
+                                                                    reverseInfo = reconstructMode)
+            return i1, leftCrop, rightCrop, upCrop, downCrop, x, z, y, q, i.shape[0], i.shape[1]
+
+        else:
+            i = cropBorders(logger = None, img = i)
+            return i
+
+
+def CropAndSaveImagesRoutine(MassImagesPath,
+                             MassMasksPath,
+                             croppedMassImagesPath,
+                             croppedMassMasksPath):
+    from final_dataset_maker import datasetPaths
+
+    # Get paths to individual images.
+    images, masks = datasetPaths(
+            logger = None,
+            full_img_dir = MassImagesPath,
+            mask_img_dir = MassMasksPath,
+            extension = ".png",
+    )
+
+    for iPath, mPath in zip(images, masks):
+        i = cv2.imread(iPath, cv2.cv2.IMREAD_GRAYSCALE)
+        m = cv2.imread(mPath, cv2.cv2.IMREAD_GRAYSCALE)
+
+        i, m = _cropImagesRoutine(i = i,
+                                  m = m)
+
+        _, maskFileName = os.path.split(mPath)
+        maskFileName = 'CROPPED-' + maskFileName
+
+        _, imgFileName = os.path.split(iPath)
+        imgFileName = 'CROPPED-' + imgFileName
+
+        cv2.imwrite(os.path.join(croppedMassImagesPath, imgFileName), i)
+        cv2.imwrite(os.path.join(croppedMassMasksPath, maskFileName), m)
+
+
 def CBISFullRoutine():
     dcmMassTrainingFolderPath = "/Volumes/Extreme SSD//CBIS-Mass-Training/"
     dcmMassTestingFolderPath = "/Volumes/Extreme SSD//CBIS-Mass-Testing/"
@@ -1007,18 +1217,19 @@ def CBISFullRoutine():
     dcmCalcTrainingFolderPath = "/Volumes/Extreme SSD//CBIS-Calc-Training/"
     dcmCalcTestingFolderPath = "/Volumes/Extreme SSD//CBIS-Calc-Testing/"
 
-    originalTrainingMassPreprocessedIMGFolderPath = "../CBIS/intermediate/CBIS-Original-Mass-Training-Preprocessed-IMG"
-    originalTrainingMassPreprocessedMSKFolderPath = "../CBIS/intermediate/CBIS-Original-Mass-Training-Preprocessed-MSK"
+    originalTrainingMassPreprocessedIMGFolderPath = "../CBIS-Original-Mass-Training-Preprocessed-IMG"
+    originalTrainingMassPreprocessedMSKFolderPath = "../CBIS-Original-Mass-Training-Preprocessed-MSK"
     originalTrainingMassCSVPath = "../CBIS/mass_case_description_train_set.csv"
-    updatedTrainingMassCSVPath = "../CBIS/mass_case_description_train_set_UPDATED.csv"
+    updatedTrainingMassCSVPath = "../CBIS/mass_case_description_train_set_UPDATED2.csv"
 
-    originalTestingMassPreprocessedIMGFolderPath = "../CBIS/intermediate/CBIS-Original-Mass-Testing-Preprocessed-IMG"
-    originalTestingMassPreprocessedMSKFolderPath = "../CBIS/intermediate/CBIS-Original-Mass-Testing-Preprocessed-MSK"
+    originalTestingMassPreprocessedIMGFolderPath = "../CBIS-Original-Mass-Testing-Preprocessed-IMG"
+    originalTestingMassPreprocessedMSKFolderPath = "../CBIS-Original-Mass-Testing-Preprocessed-MSK"
+
     originalTestingMassCSVPath = "../CBIS/mass_case_description_test_set.csv"
-    updatedTestingMassCSVPath = "../CBIS/mass_case_description_test_set_UPDATED.csv"
+    updatedTestingMassCSVPath = "../CBIS/mass_case_description_test_set_UPDATED2.csv"
 
-    completePreprocessedMassIMGFolderPath = "../CBIS/CBIS-Original-Mass-Preprocessed-Complete-IMG"
-    completePreprocessedMassMSKFolderPath = "../CBIS/CBIS-Original-Mass-Preprocessed-Complete-MSK"
+    completePreprocessedMassIMGFolderPath = "../CBIS-Original-Mass-Preprocessed-Complete-IMG"
+    completePreprocessedMassMSKFolderPath = "../CBIS-Original-Mass-Preprocessed-Complete-MSK"
 
     originalTrainingCalcPreprocessedIMGFolderPath = "../CBIS/intermediate/CBIS-Original-Calc-Training-Preprocessed-IMG"
     originalTrainingCalcPreprocessedMSKFolderPath = "../CBIS/intermediate/CBIS-Original-Calc-Training-Preprocessed-MSK"
@@ -1047,16 +1258,16 @@ def CBISFullRoutine():
                             extension = extension,
                             suffix = 'Mass-Training_')
 
-    """    __CBISParametricRoutine(dcmFolder = dcmMassTestingFolderPath,
-                                originalPreprocessedIMGFolderPath = originalTestingMassPreprocessedIMGFolderPath,
-                                originalPreprocessedMSKFolderPath = originalTestingMassPreprocessedMSKFolderPath,
-                                originalCSVPath = originalTestingMassCSVPath,
-                                updatedCSVPath = updatedTestingMassCSVPath,
-                                completePreprocessedIMGFolderPath = completePreprocessedMassIMGFolderPath,
-                                completePreprocessedMSKFolderPath = completePreprocessedMassMSKFolderPath,
-                                abnormality_col = abnormality_col,
-                                extension = extension,
-                                suffix = 'Mass-Test_')"""
+    __CBISParametricRoutine(dcmFolder = dcmMassTestingFolderPath,
+                            originalPreprocessedIMGFolderPath = originalTestingMassPreprocessedIMGFolderPath,
+                            originalPreprocessedMSKFolderPath = originalTestingMassPreprocessedMSKFolderPath,
+                            originalCSVPath = originalTestingMassCSVPath,
+                            updatedCSVPath = updatedTestingMassCSVPath,
+                            completePreprocessedIMGFolderPath = completePreprocessedMassIMGFolderPath,
+                            completePreprocessedMSKFolderPath = completePreprocessedMassMSKFolderPath,
+                            abnormality_col = abnormality_col,
+                            extension = extension,
+                            suffix = 'Mass-Test_')
 
     """__CBISParametricRoutine(dcmFolder = dcmCalcTrainingFolderPath,
                             originalPreprocessedIMGFolderPath = originalTrainingCalcPreprocessedIMGFolderPath,
@@ -1067,18 +1278,23 @@ def CBISFullRoutine():
                             completePreprocessedMSKFolderPath = completePreprocessedCalcMSKFolderPath,
                             abnormality_col = abnormality_col,
                             extension = extension,
-                            suffix = 'Calc-Training_')"""
+                            suffix = 'Calc-Training_')
 
-    """    __CBISParametricRoutine(dcmFolder = dcmCalcTestingFolderPath,
-                                originalPreprocessedIMGFolderPath = originalTestingCalcPreprocessedIMGFolderPath,
-                                originalPreprocessedMSKFolderPath = originalTestingCalcPreprocessedMSKFolderPath,
-                                originalCSVPath = originalTestingCalcCSVPath,
-                                updatedCSVPath = updatedTestingCalcCSVPath,
-                                completePreprocessedIMGFolderPath = completePreprocessedCalcIMGFolderPath,
-                                completePreprocessedMSKFolderPath = completePreprocessedCalcMSKFolderPath,
-                                abnormality_col = abnormality_col,
-                                extension = extension,
-                                suffix = 'Calc-Test_')"""
+    __CBISParametricRoutine(dcmFolder = dcmCalcTestingFolderPath,
+                            originalPreprocessedIMGFolderPath = originalTestingCalcPreprocessedIMGFolderPath,
+                            originalPreprocessedMSKFolderPath = originalTestingCalcPreprocessedMSKFolderPath,
+                            originalCSVPath = originalTestingCalcCSVPath,
+                            updatedCSVPath = updatedTestingCalcCSVPath,
+                            completePreprocessedIMGFolderPath = completePreprocessedCalcIMGFolderPath,
+                            completePreprocessedMSKFolderPath = completePreprocessedCalcMSKFolderPath,
+                            abnormality_col = abnormality_col,
+                            extension = extension,
+                            suffix = 'Calc-Test_')"""
+
+    CropAndSaveImagesRoutine(MassImagesPath = "../CBIS/CBIS-MASS-FINAL-IMG",
+                             MassMasksPath = "../CBIS/CBIS-MASS-FINAL-MSK",
+                             croppedMassImagesPath = "../CBIS/cropped/CBIS-MASS-Cropped-FINAL-IMG",
+                             croppedMassMasksPath = "../CBIS/cropped/CBIS-MASS-Cropped-FINAL-MSK")
 
 
 def CSAWFullRoutine():
@@ -1095,6 +1311,11 @@ def CSAWFullRoutine():
                       outputImagesPath = originalPreprocessedCSAWImagesPath,
                       outputMasksPath = originalPreprocessedCSAWMakskPath,
                       mammGlandMasksPath = mammGlandsMasksPath)
+
+    CropAndSaveImagesRoutine(MassImagesPath = "../CSAW/CSAW-FINAL-IMG",
+                             MassMasksPath = "../CSAW/CSAW-FINAL-MSK",
+                             croppedMassImagesPath = "../CSAW/CSAW-Cropped-FINAL-IMG",
+                             croppedMassMasksPath = "../CSAW/CSAW-Cropped-FINAL-MSK")
 
 
 def BCDRPreprocessing(imagesDirPath, masksDirPath, outputImagesPath, outputMasksPath):
@@ -1243,6 +1464,11 @@ def INBreastFullRoutine():
                           outputImagesPath = completePreprocessedIMGFolderPath,
                           outputMasksPath = completePreprocessedMSKFolderPath)
 
+    CropAndSaveImagesRoutine(MassImagesPath = "../INbreast/INBREAST-FINAL-IMG",
+                             MassMasksPath = "../INbreast/INBREAST-FINAL-MSK",
+                             croppedMassImagesPath = "../INbreast/INBREAST-Cropped-IMG",
+                             croppedMassMasksPath = "../INbreast/INBREAST-Cropped-MSK")
+
 
 # TODO Check this, should process directly xmls or have a preprocessing step (in INbreast module)
 #  where xmls are converted into png files ?
@@ -1250,14 +1476,14 @@ def INBreastPreprocessing(imagesDirPath, masksDirPath, csvPath, outputImagesPath
     # Get individual .dcm paths.
     dcmPaths = []
 
-    # Check whether the specified path exists or not
+    # Check whether the specified i exists or not
     isExist = os.path.exists(outputImagesPath)
 
     if not isExist:
         # Create a new directory because it does not exist
         os.makedirs(outputImagesPath)
 
-    # Check whether the specified path exists or not
+    # Check whether the specified i exists or not
     isExist = os.path.exists(outputMasksPath)
 
     if not isExist:
@@ -1295,12 +1521,6 @@ def INBreastPreprocessing(imagesDirPath, masksDirPath, csvPath, outputImagesPath
             continue
 
         mp = mp[0]
-
-        # Read mask .xml file
-        maskArray = loadInbreastMask(mask_path = mp, filter = True)
-
-        if np.sum(maskArray) < 6000:
-            continue
 
         # Read full mammogram .dcm file.
         ds = pydicom.dcmread(fullMammPath)
@@ -1352,6 +1572,13 @@ def INBreastPreprocessing(imagesDirPath, masksDirPath, csvPath, outputImagesPath
                 dtype = cv2.CV_32F,
         )"""
 
+        # Read mask .xml file
+        mShape = (ds.pixel_array.shape[0], ds.pixel_array.shape[1])
+        maskArray = loadInbreastMask(mask_path = mp, filter = True, imshape = mShape)
+
+        if np.sum(maskArray) < 6000:
+            continue
+
         # Save preprocessed full mammogram image.
         savedFilename = (
                 os.path.basename(fullMammPath).replace(".dcm", "")
@@ -1402,18 +1629,23 @@ def INBreastPreprocessing(imagesDirPath, masksDirPath, csvPath, outputImagesPath
 
 
 def BCDRFullRoutine():
-    originalBCDRImagesPath = "../BCDR/BCDR-Images"
-    originalBCDRMasksPath = "../BCDR/BCDR-Masks"
+    originalBCDRImagesPath = "../BCDR/BCDR-Images-Original"
+    originalBCDRMasksPath = "../BCDR/BCDR-Masks-Original"
     completePreprocessedIMGFolderPath = "../BCDR/BCDR-Original-Preprocessed-IMG"
     completePreprocessedMSKFolderPath = "../BCDR/BCDR-Original-Preprocessed-MSK"
     BCDRPreprocessing(imagesDirPath = originalBCDRImagesPath,
                       masksDirPath = originalBCDRMasksPath,
                       outputImagesPath = completePreprocessedIMGFolderPath,
                       outputMasksPath = completePreprocessedMSKFolderPath)
+    CropAndSaveImagesRoutine(MassImagesPath = "../BCDR/BCDR-FINAL-IMG",
+                             MassMasksPath = "../BCDR/BCDR-FINAL-MSK",
+                             croppedMassImagesPath = "../BCDR/BCDR-Cropped-FINAL-IMG",
+                             croppedMassMasksPath = "../BCDR/BCDR-Cropped-FINAL-MSK")
 
 
 if __name__ == '__main__':
-    CSAWFullRoutine()
-    CBISFullRoutine()
-    INBreastFullRoutine()
-    BCDRFullRoutine()
+    # CSAWFullRoutine()
+    # CBISFullRoutine()
+    # INBreastFullRoutine()
+    # BCDRFullRoutine()
+    pass

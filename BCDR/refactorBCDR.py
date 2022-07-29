@@ -24,7 +24,7 @@ def mergeCSVs(csvPath1: str, csvPath2: str, outputFilePath, dropDuplicates: bool
 
 def renameTifFiles(filePath: str) -> str:
     """
-    This function takes the absolute path of a .dcm file
+    This function takes the absolute i of a .dcm file
     and renames it according to the convention below:
     1. Full mammograms:
         - Mass-Training_P_00001_LEFT_CC_FULL.dcm
@@ -39,7 +39,7 @@ def renameTifFiles(filePath: str) -> str:
     Parameters
     ----------
     filePath : {str}
-        The relative (or absolute) path of the .dcm file
+        The relative (or absolute) i of the .dcm file
         to rename, including the .dcm filename.
         e.g. "source_folder/Mass-Training_P_00001_LEFT_CC/1.dcm"
     Returns
@@ -47,7 +47,7 @@ def renameTifFiles(filePath: str) -> str:
     newFilename : {str}
         The new name that the .dcm file should have
         WITH the ".dcm" extention WITHOUT its relative
-        (or absolute) path.
+        (or absolute) i.
         e.g. "Mass-Training_P_00001_LEFT_CC_FULL.dcm"
     False : {boolean}
         False is returned if the new name of the .dcm
@@ -77,7 +77,7 @@ def countTifFiles(topDirectory: str) -> int:
     Returns
     -------
     count : {int}
-        The number of .tif files in `path`.
+        The number of .tif files in `i`.
     """
 
     count = 0
@@ -107,15 +107,15 @@ def moveTifFileUp(destinationDir: str, sourceDir: str, dcmFilename: str) -> None
     Parameters
     ----------
     destinationDir : {str}
-        The relative (or absolute) path of the folder that
+        The relative (or absolute) i of the folder that
         the .dcm file needs to be moved to.
     sourceDir : {str}
-        The relative (or absolute) path where the .dcm file
+        The relative (or absolute) i where the .dcm file
         needs to be moved from, including the filename.
         e.g. "source_folder/Mass-Training_P_00001_LEFT_CC_FULL.tif"
     dcmFilename : {str}
         The name of the .dcm file WITH the ".dcm" extension
-        but WITHOUT its (relative or absolute) path.
+        but WITHOUT its (relative or absolute) i.
         e.g. "Mass-Training_P_00001_LEFT_CC_FULL.tif".
     Returns
     -------
@@ -125,11 +125,11 @@ def moveTifFileUp(destinationDir: str, sourceDir: str, dcmFilename: str) -> None
     try:
         dest_dir_with_new_name = os.path.join(destinationDir, dcmFilename)
 
-        # If the destination path does not exist yet...
+        # If the destination i does not exist yet...
         if not os.path.exists(dest_dir_with_new_name):
             shutil.move(sourceDir, destinationDir)
 
-        # If the destination path already exists...
+        # If the destination i already exists...
         elif os.path.exists(dest_dir_with_new_name):
             # Add "_a" to the end of `new_name` generated above.
             newName2 = dcmFilename.strip(".tif") + "___a.tif"
@@ -269,8 +269,8 @@ def updateTifPath(og_df, images_folder):
     og_df : {pd.DataFrame}
         The original Pandas DataFrame that needs to be updated.
     images_folder : {str}
-        The relative (or absolute) path to the folder that contains
-        all the .tif files to get the path.
+        The relative (or absolute) i to the folder that contains
+        all the .tif files to get the i.
     Returns
     -------
     og_df: {pd.DataFrame}
@@ -305,7 +305,7 @@ def updateTifPath(og_df, images_folder):
             study_id = '_study_' + str(row.study_id)
             fname = '_img_' + str(row.patient_id) + '_' + str(row.study_id) + '_1_' + views[str(row.image_view)]
 
-            # Use this list to match DF row with .dcm path.
+            # Use this list to match DF row with .dcm i.
 
             # Get list of relevant paths to this patient.
             full_path = [
@@ -324,13 +324,11 @@ def updateTifPath(og_df, images_folder):
     return og_df
 
 
-# ----------------------------------
-
 def reorganizeBCDRFiles(topDirectory: str):
-    """main function for extractDicom module.
+    """main function for reorganizeBCDRFiles module.
     iterates through each image and executes the necessary
     image preprocessing steps on each image, and saves
-    preprocessed images in the output path specified.
+    preprocessed images in the output i specified.
     Parameters
     """
 
@@ -444,14 +442,14 @@ def createMasksAndImagesFolder(csvPath: str,
     filesWithMask = list(slicedCsv[pathsColumnName])
     temp = []
 
-    # Check whether the specified path exists or not
+    # Check whether the specified i exists or not
     isExist = os.path.exists(masksDirectory)
 
     if not isExist:
         # Create a new directory because it does not exist
         os.makedirs(masksDirectory)
 
-    # Check whether the specified path exists or not
+    # Check whether the specified i exists or not
     isExist = os.path.exists(imagesDirectory)
 
     if not isExist:
@@ -537,8 +535,8 @@ def refactorBCDR():
 
     outputMergedCSVPath = '../BCDR/ouput.csv'
 
-    bcdrMasksPath = '/Users/pablo/Desktop/nl2-project/BCDR/BCDR-Masks'
-    bcdrImagesPath = '/Users/pablo/Desktop/nl2-project/BCDR/BCDR-Images'
+    bcdrMasksPath = '/Users/pablo/Desktop/nl2-project/BCDR/BCDR-Masks-Original'
+    bcdrImagesPath = '/Users/pablo/Desktop/nl2-project/BCDR/BCDR-Images-Original'
 
     xCoordsColumnName = 'lw_x_points'
     yCoordsColumnName = 'lw_y_points'
@@ -552,9 +550,9 @@ def refactorBCDR():
     updateCSV(input_csv_path = csvPathD01, img_png_folder = bcdrDatasetD01Path,
               output_csv_path = outputCsvPath02)
 
-    """    keepOnlyImagesWithMasks(imagesDirectory = "/Users/pablo/Downloads/BCDR/BCDR-D01_dataset",
-                                csvPath = "/Users/pablo/Desktop/nl2-project/BCDR/bcdr_d01_outlines_UPDATED.csv",
-                                columnName = "image_filename")"""
+    keepOnlyImagesWithMasks(imagesDirectory = "/Users/pablo/Downloads/BCDR/BCDR-D01_dataset",
+                            csvPath = "/Users/pablo/Desktop/nl2-project/BCDR/bcdr_d01_outlines_UPDATED.csv",
+                            columnName = "image_filename")
 
     r = pd.read_csv(csvPathD01)
     columnNames = list(r.columns)
