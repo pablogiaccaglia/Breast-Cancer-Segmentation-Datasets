@@ -1637,8 +1637,8 @@ def BCDRFullRoutine():
                       masksDirPath = originalBCDRMasksPath,
                       outputImagesPath = completePreprocessedIMGFolderPath,
                       outputMasksPath = completePreprocessedMSKFolderPath)
-    CropAndSaveImagesRoutine(MassImagesPath = "../BCDR/BCDR-FINAL-IMG",
-                             MassMasksPath = "../BCDR/BCDR-FINAL-MSK",
+    CropAndSaveImagesRoutine(MassImagesPath = "../BCDR/BCDR-SELECTED-IMGS",
+                             MassMasksPath = "../BCDR/BCDR-SELECTED-MASKS",
                              croppedMassImagesPath = "../BCDR/BCDR-Cropped-FINAL-IMG",
                              croppedMassMasksPath = "../BCDR/BCDR-Cropped-FINAL-MSK")
 

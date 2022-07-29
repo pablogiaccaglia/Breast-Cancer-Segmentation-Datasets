@@ -472,7 +472,7 @@ def AttentionResUNet(inputShape, numClasses = 1, dropoutRate = 0.2, batchNormali
 img_rows = 256
 img_cols = 256
 
-narr = np.load("/Users/pablo/Desktop/nl2-project/CBIS/Dataset-split-arrays/Testing-Final-IMG-Arrays/testing_img_array__3.npy")
+narr = np.load("/splits/Dataset-split-arrays/Testing-Final-IMG-Arrays/testing_img_array__3.npy")
 
 narr = preprocess_input(narr)
 model = AttentionResUNet((img_rows, img_cols, 3))
