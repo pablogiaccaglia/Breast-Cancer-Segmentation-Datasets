@@ -29,8 +29,8 @@ def get_segmented_image(image, masks):
     return img_mask
 
 
-WRITE_PATH = '/Users/pablo/Desktop/nl2-project/CDD/real_segmentations'
-ANNOTATION_CSV_FILE = '/Users/pablo/Desktop/nl2-project/CDD/Radiology_hand_drawn_segmentations_v2.csv'
+WRITE_PATH = '/CDD-SELECTED-MASKS'
+ANNOTATION_CSV_FILE = '/original/Radiology_hand_drawn_segmentations_v2.csv'
 
 df = pd.read_csv(ANNOTATION_CSV_FILE)
 try:
@@ -38,7 +38,7 @@ try:
 except:
     print("i already exists")
 
-imagesPath = "/Users/pablo/Desktop/nl2-project/CDD/PKG - CDD-CESM/Low energy images of CDD-CESM/"
+imagesPath = "/Users/pablo/Desktop/nl2-project/CDD/original/Low energy images of CDD-CESM/"
 
 entries = os.listdir(imagesPath)
 entries.sort()
