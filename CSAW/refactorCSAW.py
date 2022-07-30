@@ -91,13 +91,13 @@ def _routineRefactorCSAW(origin_folder, target_folder, mode, file_index, file_na
 def refactorCSAW():
     file_index = 1
     annotatorNumber = 3
-    baseOriginalTestingMSKFolder = "../CSAW/CsawS_original_folder/test_data/annotator_"
+    baseOriginalTestingMSKFolder = "../CSAW/original/test_data/annotator_"
     originalTestingMSKFolder = baseOriginalTestingMSKFolder + str(annotatorNumber)
 
-    originalTestingIMGFolder = "../CSAW/CsawS_original_folder/test_data/anonymized_dataset"
+    originalTestingIMGFolder = "../CSAW/original/test_data/anonymized_dataset"
 
-    originalTrainingMSKFolder = "../CSAW/CsawS_original_folder/anonymized_dataset"
-    originalTrainingIMGFolder = "../CSAW/CsawS_original_folder/anonymized_dataset"
+    originalTrainingMSKFolder = "../CSAW/original/anonymized_dataset"
+    originalTrainingIMGFolder = "../CSAW/original/anonymized_dataset"
 
     targetImgsFolder = "../CSAW/intermediate/CSAW-Original-IMG"
     targetMsksFolder = "../CSAW/intermediate/CSAW-Original-MSK"
@@ -138,7 +138,7 @@ def refactorCSAW():
                          file_name_suffix = masksFileNameSuffix)
 
     annotatorNumber = 1
-    baseOriginalTestingMSKFolder = "../CSAW/CsawS_original_folder/test_data/annotator_"
+    baseOriginalTestingMSKFolder = "../CSAW/original/test_data/annotator_"
     originalTestingMSKFolder = baseOriginalTestingMSKFolder + str(annotatorNumber)
 
     file_index = 1
