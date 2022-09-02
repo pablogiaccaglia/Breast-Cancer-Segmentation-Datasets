@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Images</key>
+	<array>
+		<dict>
+			<key>ImageIndex</key>
+			<integer>0</integer>
+			<key>NumberOfROIs</key>
+			<integer>4</integer>
+			<key>ROIs</key>
+			<array>
+				<dict>
+					<key>Area</key>
+					<real>0.0</real>
+					<key>Center</key>
+					<string>(0.000000, 0.000000, 0.000000)</string>
+					<key>Dev</key>
+					<real>0.0</real>
+					<key>IndexInImage</key>
+					<integer>0</integer>
+					<key>Max</key>
+					<real>2039</real>
+					<key>Mean</key>
+					<real>2039</real>
+					<key>Min</key>
+					<real>2039</real>
+					<key>Name</key>
+					<string>Calcification</string>
+					<key>NumberOfPoints</key>
+					<integer>1</integer>
+					<key>Point_mm</key>
+					<array>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+					</array>
+					<key>Point_px</key>
+					<array>
+						<string>(1850.420044, 2605.199951)</string>
+					</array>
+					<key>Total</key>
+					<real>2039</real>
+					<key>Type</key>
+					<integer>19</integer>
+				</dict>
+				<dict>
+					<key>Area</key>
+					<real>0.0</real>
+					<key>Center</key>
+					<string>(0.000000, 0.000000, 0.000000)</string>
+					<key>Dev</key>
+					<real>0.0</real>
+					<key>IndexInImage</key>
+					<integer>1</integer>
+					<key>Max</key>
+					<real>2071</real>
+					<key>Mean</key>
+					<real>2071</real>
+					<key>Min</key>
+					<real>2071</real>
+					<key>Name</key>
+					<string>Calcification</string>
+					<key>NumberOfPoints</key>
+					<integer>1</integer>
+					<key>Point_mm</key>
+					<array>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+					</array>
+					<key>Point_px</key>
+					<array>
+						<string>(1842.689941, 2230.110107)</string>
+					</array>
+					<key>Total</key>
+					<real>2071</real>
+					<key>Type</key>
+					<integer>19</integer>
+				</dict>
+				<dict>
+					<key>Area</key>
+					<real>0.0</real>
+					<key>Center</key>
+					<string>(0.000000, 0.000000, 0.000000)</string>
+					<key>Dev</key>
+					<real>0.0</real>
+					<key>IndexInImage</key>
+					<integer>2</integer>
+					<key>Max</key>
+					<real>1955</real>
+					<key>Mean</key>
+					<real>1955</real>
+					<key>Min</key>
+					<real>1955</real>
+					<key>Name</key>
+					<string>Calcification</string>
+					<key>NumberOfPoints</key>
+					<integer>1</integer>
+					<key>Point_mm</key>
+					<array>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+					</array>
+					<key>Point_px</key>
+					<array>
+						<string>(1786.619995, 2251.300049)</string>
+					</array>
+					<key>Total</key>
+					<real>1955</real>
+					<key>Type</key>
+					<integer>19</integer>
+				</dict>
+				<dict>
+					<key>Area</key>
+					<real>0.007901250384747982</real>
+					<key>Center</key>
+					<string>(0.000000, 0.000000, 0.000000)</string>
+					<key>Dev</key>
+					<real>122.20267486572266</real>
+					<key>IndexInImage</key>
+					<integer>3</integer>
+					<key>Max</key>
+					<real>2137</real>
+					<key>Mean</key>
+					<real>1756.9022216796875</real>
+					<key>Min</key>
+					<real>1503</real>
+					<key>Name</key>
+					<string>Calcification</string>
+					<key>NumberOfPoints</key>
+					<integer>9</integer>
+					<key>Point_mm</key>
+					<array>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+					</array>
+					<key>Point_px</key>
+					<array>
+						<string>(2069.860107, 2177.629883)</string>
+						<string>(2074.550049, 2177.040039)</string>
+						<string>(2078.659912, 2179.100098)</string>
+						<string>(2080.419922, 2182.909912)</string>
+						<string>(2080.129883, 2188.489990)</string>
+						<string>(2076.899902, 2192.010010)</string>
+						<string>(2071.330078, 2190.840088)</string>
+						<string>(2068.689941, 2187.020020)</string>
+						<string>(2067.510010, 2181.439941)</string>
+					</array>
+					<key>Total</key>
+					<real>323270</real>
+					<key>Type</key>
+					<integer>15</integer>
+				</dict>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

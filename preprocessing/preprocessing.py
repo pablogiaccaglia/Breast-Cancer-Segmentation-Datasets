@@ -1464,8 +1464,8 @@ def INBreastFullRoutine():
                           outputImagesPath = completePreprocessedIMGFolderPath,
                           outputMasksPath = completePreprocessedMSKFolderPath)
 
-    CropAndSaveImagesRoutine(MassImagesPath = "../INbreast/INBREAST-FINAL-IMG",
-                             MassMasksPath = "../INbreast/INBREAST-FINAL-MSK",
+    CropAndSaveImagesRoutine(MassImagesPath = "../INbreast/INBREAST-SELECTED-IMGS",
+                             MassMasksPath = "../INbreast/INBREAST-SELECTED-MSKS",
                              croppedMassImagesPath = "../INbreast/INBREAST-Cropped-IMG",
                              croppedMassMasksPath = "../INbreast/INBREAST-Cropped-MSK")
 

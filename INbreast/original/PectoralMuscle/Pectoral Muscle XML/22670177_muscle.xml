@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Images</key>
+	<array>
+		<dict>
+			<key>ImageIndex</key>
+			<integer>0</integer>
+			<key>NumberOfROIs</key>
+			<integer>1</integer>
+			<key>ROIs</key>
+			<array>
+				<dict>
+					<key>Area</key>
+					<real>4.8180851936340332</real>
+					<key>Center</key>
+					<string>(0.000000, 0.000000, 0.000000)</string>
+					<key>Dev</key>
+					<real>91.288993835449219</real>
+					<key>IndexInImage</key>
+					<integer>0</integer>
+					<key>Max</key>
+					<real>2014</real>
+					<key>Mean</key>
+					<real>1503.8309326171875</real>
+					<key>Min</key>
+					<real>1033</real>
+					<key>Name</key>
+					<string>Pectoral Muscle</string>
+					<key>NumberOfPoints</key>
+					<integer>21</integer>
+					<key>Point_mm</key>
+					<array>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+					</array>
+					<key>Point_px</key>
+					<array>
+						<string>(368.961548, 7.176880)</string>
+						<string>(311.046875, 42.947632)</string>
+						<string>(261.649048, 82.976929)</string>
+						<string>(209.696167, 125.561279)</string>
+						<string>(181.590576, 168.145630)</string>
+						<string>(163.705078, 244.797363)</string>
+						<string>(150.078125, 318.042358)</string>
+						<string>(134.747803, 391.287476)</string>
+						<string>(121.120850, 473.901001)</string>
+						<string>(111.752197, 555.662842)</string>
+						<string>(104.441650, 617.575806)</string>
+						<string>(96.168213, 692.037476)</string>
+						<string>(91.311768, 771.139648)</string>
+						<string>(81.943237, 850.346436)</string>
+						<string>(74.105469, 920.938232)</string>
+						<string>(65.831909, 1003.673462)</string>
+						<string>(57.558350, 1075.377197)</string>
+						<string>(46.172363, 1145.029907)</string>
+						<string>(34.248779, 1223.385010)</string>
+						<string>(21.706543, 1284.973022)</string>
+						<string>(0.181274, 1354.544678)</string>
+					</array>
+					<key>Total</key>
+					<real>150404144</real>
+					<key>Type</key>
+					<integer>10</integer>
+				</dict>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

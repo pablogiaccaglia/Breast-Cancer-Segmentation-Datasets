@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Images</key>
+	<array>
+		<dict>
+			<key>ImageIndex</key>
+			<integer>0</integer>
+			<key>NumberOfROIs</key>
+			<integer>2</integer>
+			<key>ROIs</key>
+			<array>
+				<dict>
+					<key>Area</key>
+					<real>0.76496350765228271</real>
+					<key>Center</key>
+					<string>(0.000000, 0.000000, 0.000000)</string>
+					<key>Dev</key>
+					<real>0.0</real>
+					<key>IndexInImage</key>
+					<integer>0</integer>
+					<key>Max</key>
+					<real>0.0</real>
+					<key>Mean</key>
+					<real>0.0</real>
+					<key>Min</key>
+					<real>0.0</real>
+					<key>Name</key>
+					<string>Mass</string>
+					<key>NumberOfPoints</key>
+					<integer>32</integer>
+					<key>Point_mm</key>
+					<array>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+					</array>
+					<key>Point_px</key>
+					<array>
+						<string>(366.979004, 2209.090088)</string>
+						<string>(358.519989, 2192.729980)</string>
+						<string>(357.322998, 2179.560059)</string>
+						<string>(358.519989, 2166.389893)</string>
+						<string>(357.322998, 2152.030029)</string>
+						<string>(357.322998, 2138.860107)</string>
+						<string>(364.506012, 2125.689941)</string>
+						<string>(366.899994, 2112.520020)</string>
+						<string>(380.067993, 2108.929932)</string>
+						<string>(393.234985, 2111.330078)</string>
+						<string>(406.403015, 2113.719971)</string>
+						<string>(420.768005, 2117.310059)</string>
+						<string>(433.936005, 2124.489990)</string>
+						<string>(447.104004, 2136.469971)</string>
+						<string>(454.286011, 2149.629883)</string>
+						<string>(461.467987, 2162.800049)</string>
+						<string>(466.256989, 2175.969971)</string>
+						<string>(475.833008, 2193.919922)</string>
+						<string>(481.819000, 2208.290039)</string>
+						<string>(487.803986, 2221.459961)</string>
+						<string>(492.592010, 2234.620117)</string>
+						<string>(493.789001, 2247.790039)</string>
+						<string>(492.592010, 2264.550049)</string>
+						<string>(475.833008, 2271.729980)</string>
+						<string>(462.665985, 2269.340088)</string>
+						<string>(449.497986, 2271.729980)</string>
+						<string>(436.329987, 2274.129883)</string>
+						<string>(423.161987, 2269.340088)</string>
+						<string>(409.993988, 2259.760010)</string>
+						<string>(399.890991, 2244.469971)</string>
+						<string>(391.662994, 2235.419922)</string>
+						<string>(369.446991, 2226.370117)</string>
+					</array>
+					<key>Total</key>
+					<real>0.0</real>
+					<key>Type</key>
+					<integer>15</integer>
+				</dict>
+				<dict>
+					<key>Area</key>
+					<real>8.9555435180664062</real>
+					<key>Center</key>
+					<string>(0.000000, 0.000000, 0.000000)</string>
+					<key>Dev</key>
+					<real>0.0</real>
+					<key>IndexInImage</key>
+					<integer>1</integer>
+					<key>Max</key>
+					<real>0.0</real>
+					<key>Mean</key>
+					<real>0.0</real>
+					<key>Min</key>
+					<real>0.0</real>
+					<key>Name</key>
+					<string>Mass</string>
+					<key>NumberOfPoints</key>
+					<integer>79</integer>
+					<key>Point_mm</key>
+					<array>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+					</array>
+					<key>Point_px</key>
+					<array>
+						<string>(793.797974, 1412.640015)</string>
+						<string>(795.447998, 1435.729980)</string>
+						<string>(788.849976, 1462.119995)</string>
+						<string>(783.901978, 1483.560059)</string>
+						<string>(780.603027, 1505.010010)</string>
+						<string>(770.705994, 1529.750000)</string>
+						<string>(754.211975, 1546.239990)</string>
+						<string>(741.017029, 1557.790039)</string>
+						<string>(727.820984, 1569.329956)</string>
+						<string>(711.327026, 1580.880005)</string>
+						<string>(691.533997, 1587.479980)</string>
+						<string>(673.390991, 1590.780029)</string>
+						<string>(658.546021, 1592.430054)</string>
+						<string>(640.401978, 1592.430054)</string>
+						<string>(623.908020, 1594.069946)</string>
+						<string>(607.414001, 1600.670044)</string>
+						<string>(594.218994, 1612.219971)</string>
+						<string>(585.971008, 1623.760010)</string>
+						<string>(564.528992, 1632.010010)</string>
+						<string>(544.736023, 1640.260010)</string>
+						<string>(523.293030, 1641.910034)</string>
+						<string>(501.851013, 1632.010010)</string>
+						<string>(485.356995, 1628.709961)</string>
+						<string>(472.161011, 1628.709961)</string>
+						<string>(450.718994, 1615.520020)</string>
+						<string>(434.225006, 1599.020020)</string>
+						<string>(422.678986, 1580.880005)</string>
+						<string>(409.484009, 1564.380005)</string>
+						<string>(394.639008, 1546.239990)</string>
+						<string>(383.092987, 1529.750000)</string>
+						<string>(368.247986, 1511.599976)</string>
+						<string>(353.403015, 1493.459961)</string>
+						<string>(348.454987, 1475.319946)</string>
+						<string>(343.506989, 1458.819946)</string>
+						<string>(338.558990, 1440.680054)</string>
+						<string>(322.063995, 1427.479980)</string>
+						<string>(312.167999, 1410.989990)</string>
+						<string>(302.270996, 1392.849976)</string>
+						<string>(295.674011, 1376.349976)</string>
+						<string>(285.777008, 1361.510010)</string>
+						<string>(277.529999, 1341.709961)</string>
+						<string>(282.477997, 1323.569946)</string>
+						<string>(279.178986, 1305.430054)</string>
+						<string>(284.127991, 1285.630005)</string>
+						<string>(294.023987, 1267.489990)</string>
+						<string>(305.570007, 1251.000000)</string>
+						<string>(322.063995, 1234.500000)</string>
+						<string>(338.558990, 1222.959961)</string>
+						<string>(356.701996, 1211.410034)</string>
+						<string>(374.846008, 1206.459961)</string>
+						<string>(392.989014, 1201.510010)</string>
+						<string>(409.484009, 1193.270020)</string>
+						<string>(425.977997, 1189.969971)</string>
+						<string>(442.471985, 1186.670044)</string>
+						<string>(458.966003, 1181.719971)</string>
+						<string>(475.459991, 1176.770020)</string>
+						<string>(493.604004, 1173.469971)</string>
+						<string>(510.097992, 1168.520020)</string>
+						<string>(528.242004, 1165.229980)</string>
+						<string>(544.736023, 1163.579956)</string>
+						<string>(561.229980, 1163.579956)</string>
+						<string>(577.723999, 1166.869995)</string>
+						<string>(594.218994, 1170.170044)</string>
+						<string>(612.362000, 1173.469971)</string>
+						<string>(630.505981, 1178.420044)</string>
+						<string>(648.648987, 1183.369995)</string>
+						<string>(665.143005, 1189.969971)</string>
+						<string>(681.638000, 1196.560059)</string>
+						<string>(698.132019, 1206.459961)</string>
+						<string>(714.625977, 1221.310059)</string>
+						<string>(729.471008, 1237.800049)</string>
+						<string>(741.017029, 1251.000000)</string>
+						<string>(754.211975, 1267.489990)</string>
+						<string>(765.757996, 1287.280029)</string>
+						<string>(775.655029, 1310.369995)</string>
+						<string>(780.603027, 1326.869995)</string>
+						<string>(785.551025, 1345.010010)</string>
+						<string>(790.499023, 1369.750000)</string>
+						<string>(792.148987, 1389.550049)</string>
+					</array>
+					<key>Total</key>
+					<real>0.0</real>
+					<key>Type</key>
+					<integer>15</integer>
+				</dict>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

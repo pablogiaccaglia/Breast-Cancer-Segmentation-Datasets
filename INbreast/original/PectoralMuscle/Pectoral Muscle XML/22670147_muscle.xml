@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Images</key>
+	<array>
+		<dict>
+			<key>ImageIndex</key>
+			<integer>0</integer>
+			<key>NumberOfROIs</key>
+			<integer>1</integer>
+			<key>ROIs</key>
+			<array>
+				<dict>
+					<key>Area</key>
+					<real>0.25005313754081726</real>
+					<key>Center</key>
+					<string>(0.000000, 0.000000, 0.000000)</string>
+					<key>Dev</key>
+					<real>104.98654937744141</real>
+					<key>IndexInImage</key>
+					<integer>0</integer>
+					<key>Max</key>
+					<real>1894</real>
+					<key>Mean</key>
+					<real>1474.3421630859375</real>
+					<key>Min</key>
+					<real>1168</real>
+					<key>Name</key>
+					<string>Pectoral Muscle</string>
+					<key>NumberOfPoints</key>
+					<integer>19</integer>
+					<key>Point_mm</key>
+					<array>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+						<string>(0.000000, 0.000000, 0.000000)</string>
+					</array>
+					<key>Point_px</key>
+					<array>
+						<string>(3060.932129, 6.298828)</string>
+						<string>(3078.847168, 31.803833)</string>
+						<string>(3095.749023, 58.490845)</string>
+						<string>(3111.761230, 85.177979)</string>
+						<string>(3124.215332, 111.864990)</string>
+						<string>(3136.669434, 142.110229)</string>
+						<string>(3151.791992, 183.030396)</string>
+						<string>(3160.687500, 207.938354)</string>
+						<string>(3177.589355, 244.410645)</string>
+						<string>(3192.711914, 283.551636)</string>
+						<string>(3207.834717, 317.355225)</string>
+						<string>(3221.178223, 345.821411)</string>
+						<string>(3240.748535, 387.631104)</string>
+						<string>(3256.760986, 418.765991)</string>
+						<string>(3273.662598, 454.348633)</string>
+						<string>(3288.506836, 485.492554)</string>
+						<string>(3303.018555, 521.066284)</string>
+						<string>(3313.693359, 553.090698)</string>
+						<string>(3327.555176, 594.554688)</string>
+					</array>
+					<key>Total</key>
+					<real>8747272</real>
+					<key>Type</key>
+					<integer>10</integer>
+				</dict>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>
