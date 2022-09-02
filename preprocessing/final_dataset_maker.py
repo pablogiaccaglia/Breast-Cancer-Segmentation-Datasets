@@ -731,8 +731,8 @@ def routineMakeFinalDataset():
     imagesPathINBreast = "../BCDR/BCDR-Cropped-FINAL-IMG"
     masksPathINBreast = "../BCDR/BCDR-Cropped-FINAL-MSK"
 
-    imagesPathCDD = "../CDD/PKG - CDD-CESM/Low energy images of CDD-CESM"
-    masksPathCDD = "../CDD/real_segmentations"
+    imagesPathCDD = "../CDD/original/Low energy images of CDD-CESM"
+    masksPathCDD = "../CDD/CDD-SELECTED-MASKS"
 
     trainingImgDir = "../splits/Dataset-split/CBIS-Training-Final-IMG/"
     trainingMaskDir = "../splits/Dataset-split/CBIS-Training-Final-MSK/"

@@ -7,8 +7,8 @@ import cv2
 import numpy as np
 
 from preprocessing import *
-path1 = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-MASS-FINAL-IMG/"
-path2 = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-MASS-FINAL-MSK/"
+path1 = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-MASS-SELECTED-IMGS/"
+path2 = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-MASS-SELECTED-MASKS/"
 
 s1 = "/Users/pablo/Desktop/nl2-project/CBIS/CBIS-MASS-EXPERIMENT-IMG/"
 s2 = "/Users/pablo/Desktop/nl2-project/CBIS/CBSI-MASS-EXPERIMENT-MSK/"

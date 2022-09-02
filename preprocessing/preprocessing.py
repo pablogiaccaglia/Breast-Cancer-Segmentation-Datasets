@@ -1291,8 +1291,8 @@ def CBISFullRoutine():
                             extension = extension,
                             suffix = 'Calc-Test_')"""
 
-    CropAndSaveImagesRoutine(MassImagesPath = "../CBIS/CBIS-MASS-FINAL-IMG",
-                             MassMasksPath = "../CBIS/CBIS-MASS-FINAL-MSK",
+    CropAndSaveImagesRoutine(MassImagesPath = "../CBIS/CBIS-MASS-SELECTED-IMGS",
+                             MassMasksPath = "../CBIS/CBIS-MASS-SELECTED-MASKS",
                              croppedMassImagesPath = "../CBIS/cropped/CBIS-MASS-Cropped-FINAL-IMG",
                              croppedMassMasksPath = "../CBIS/cropped/CBIS-MASS-Cropped-FINAL-MSK")
 
@@ -1312,8 +1312,8 @@ def CSAWFullRoutine():
                       outputMasksPath = originalPreprocessedCSAWMakskPath,
                       mammGlandMasksPath = mammGlandsMasksPath)
 
-    CropAndSaveImagesRoutine(MassImagesPath = "../CSAW/CSAW-FINAL-IMG",
-                             MassMasksPath = "../CSAW/CSAW-FINAL-MSK",
+    CropAndSaveImagesRoutine(MassImagesPath = "../CSAW/CSAW-SELECTED-IMGS",
+                             MassMasksPath = "../CSAW/CSAW-SELECTED-MASKS",
                              croppedMassImagesPath = "../CSAW/CSAW-Cropped-FINAL-IMG",
                              croppedMassMasksPath = "../CSAW/CSAW-Cropped-FINAL-MSK")
 
