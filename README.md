@@ -19,6 +19,10 @@
  | Size  | Original Image Format | Original Mask Format | Selected Size | Selected Image format | Selected Mask format |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | 485  | TIF  | TIF  | 72  | PNG  | PNG |
+
+Image     |  Mask |  Image     |  Mask
+:-----------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/BCDR/BCDR-SELECTED-IMGS/patient_205_study_275_img_205_275_1_LO___PRE.png)| ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/BCDR/BCDR-SELECTED-MASKS/patient_205_study_275_img_205_275_1_LO_MASK___PRE.png) | ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/BCDR/BCDR-SELECTED-IMGS/patient_511_study_733_img_511_733_1_LCC___PRE.png) | ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/BCDR/BCDR-SELECTED-MASKS/patient_511_study_733_img_511_733_1_LCC_MASK___PRE.png)
   
   ## INbreast
   The **[INbreast](https://pubmed.ncbi.nlm.nih.gov/22078258/)** database is a mammographic database, with images acquired at a Breast Centre, located in a Hospital de São João, 
