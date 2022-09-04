@@ -95,7 +95,7 @@ Image     |  Mask |  Image     |  Mask
   
 | Size  | Original Image Format | Original Mask Format | Selected Size | Selected Image format | Selected Mask format |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| 2620  | DICOM  | DICOM  | 521  | PNG  | PNG |
+| 1003  | JPG  | JPG  | -  | PNG  | PNG |
 
 
 Image     |  Mask |  Image     |  Mask
