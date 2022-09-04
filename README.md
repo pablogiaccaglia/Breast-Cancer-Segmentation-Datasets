@@ -2,12 +2,12 @@
 🩺 Curated collection of datasets for breast cancer segmentation
 
 - 📙 [Description](#-description)
-- 🗄️ [Datasets](#- Datasets)
-  - 🩻 [BCDR](#-BCDR)
-  - 🩻 [CBIS-DDSM](#-CBIS)
-  - 🩻 [CSAW-S](#-CSAW-S)
-  - 🩻 [INbreast](#-INbreast)
-  - 🩻 [CDD-CESM](#-CDD-CESM)
+- 🗄️ [Datasets](#Datasets)
+  - 🩻 [BCDR](#BCDR)
+  - 🩻 [CBIS-DDSM](#CBIS)
+  - 🩻 [CSAW-S](#CSAW-S)
+  - 🩻 [INbreast](#INbreast)
+  - 🩻 [CDD-CESM](#CDD-CESM)
   
   
 # Datasets
