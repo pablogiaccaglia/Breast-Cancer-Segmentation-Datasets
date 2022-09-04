@@ -33,6 +33,11 @@ Image     |  Mask |  Image     |  Mask
 | Size  | Original Image Format | Original Mask Format | Selected Size | Selected Image format | Selected Mask format |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | 410  | DICOM  | XML  | 64  | PNG  | PNG |
+
+Image     |  Mask |  Image     |  Mask
+:-----------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/INbreast/INBREAST-SELECTED-IMGS/20588334_493155e17143edef_MG_L_CC_ANON___PRE.png)| ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/INbreast/INBREAST-SELECTED-MSKS/20588334___PRE.png) | ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/INbreast/INBREAST-SELECTED-IMGS/51049107_8c105bb715bf1c3c_MG_L_CC_ANON___PRE.png) | ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/INbreast/INBREAST-SELECTED-MSKS/51049107___PRE.png)
+  
   
   ## CSAW-S
   
