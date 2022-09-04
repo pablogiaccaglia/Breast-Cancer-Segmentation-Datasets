@@ -4,7 +4,7 @@
 - 📙 [Description](#-description)
 - 🗄️ [Datasets](#Datasets)
   - 🩻 [BCDR](#BCDR)
-  - 🩻 [CBIS-DDSM](#CBIS)
+  - 🩻 [CBIS-DDSM](#CBIS-DDSM)
   - 🩻 [CSAW-S](#CSAW-S)
   - 🩻 [INbreast](#INbreast)
   - 🩻 [CDD-CESM](#CDD-CESM)
@@ -50,7 +50,7 @@
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | 2620  | DICOM  | DICOM  | 521  | PNG  | PNG |
   
-  ## CDD - CESM
+  ## CDD-CESM
   This dataset is a collection of **[2,006 high-resolution Contrast-enhanced spectral mammography (CESM) images](https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=109379611#109379611bcab02c187174a288dbcbf95d26179e8)** with annotations and medical reports. 
   CESM is done using the standard digital mammography equipment, with additional software that performs dual-energy image acquisition. 
   The images were converted from DICOM to JPEG. They have an average of 2355 x 1315 pixels.
