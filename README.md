@@ -50,6 +50,11 @@ Image     |  Mask |  Image     |  Mask
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | 338  | PNG  | PNG  | 152  | PNG  | PNG |
 
+Image     |  Mask |  Image     |  Mask
+:-----------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CSAW/CSAW-SELECTED-IMGS/CSAW-Image-122.png___PRE.png)| ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CSAW/CSAW-SELECTED-MASKS/CSAW-Mask-122.png___PRE.png) | ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CSAW/CSAW-SELECTED-IMGS/CSAW-Image-195.png___PRE.png) | ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CSAW/CSAW-SELECTED-MASKS/CSAW-Mask-195.png___PRE.png)
+  
+
   ## CBIS-DDSM
   This [**CBIS-DDSM** (Curated Breast Imaging Subset of DDSM)](https://wiki.cancerimagingarchive.net/display/Public/CBIS-DDSM#22516629a13afa7b813e47d190f5fe9ac357446f) is an updated and standardized version of the  Digital Database for Screening Mammography (DDSM). The DDSM is a database of 2,620 scanned film mammography studies. 
   It contains normal, benign, and malignant cases with verified pathology information. The scale of the database along with ground truth validation makes the DDSM a useful tool in the development and testing of decision support systems. 
@@ -58,6 +63,16 @@ Image     |  Mask |  Image     |  Mask
 | Size  | Original Image Format | Original Mask Format | Selected Size | Selected Image format | Selected Mask format |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | 2620  | DICOM  | DICOM  | 521  | PNG  | PNG |
+
+| Size  | Original Image Format | Original Mask Format | Selected Size | Selected Image format | Selected Mask format |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| 410  | DICOM  | XML  | 64  | PNG  | PNG |
+
+Image     |  Mask |  Image     |  Mask
+:-----------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CBIS/CBIS-MASS-SELECTED-IMGS/Mass-Test_P_00194_RIGHT_CC_FULL___PRE.png)| ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CBIS/CBIS-MASS-SELECTED-MASKS/Mass-Test_P_00194_RIGHT_CC_MASK_1___PRE.png) | ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CBIS/CBIS-MASS-SELECTED-IMGS/Mass-Test_P_00343_RIGHT_MLO_FULL___PRE.png) | ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CBIS/CBIS-MASS-SELECTED-MASKS/Mass-Test_P_00343_RIGHT_MLO_MASK___PRE.png)
+  
+  
   
   ## CDD-CESM
   This dataset is a collection of **[2,006 high-resolution Contrast-enhanced spectral mammography (CESM) images](https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=109379611#109379611bcab02c187174a288dbcbf95d26179e8)** with annotations and medical reports. 
@@ -69,5 +84,11 @@ Image     |  Mask |  Image     |  Mask
   | Size  | Original Image Format | Original Mask Format | Selected Size | Selected Image format | Selected Mask format |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | 2620  | JPG  | CSV  | 521  | PNG  | PNG |
+
+
+Image     |  Mask |  Image     |  Mask
+:-----------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CDD/CDD-SELECTED-IMGS/P177_L_DM_MLO.jpg)| ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CDD/CDD-SELECTED-MASKS/P177_L_DM_MLO_MASK.jpg) | ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CDD/CDD-SELECTED-IMGS/P67_R_DM_MLO.jpg) | ![](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CDD/CDD-SELECTED-MASKS/P67_R_DM_MLO_MASK.jpg)
+  
   
   
