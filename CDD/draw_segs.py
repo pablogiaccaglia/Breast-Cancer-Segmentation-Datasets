@@ -29,16 +29,16 @@ def get_segmented_image(image, masks):
     return img_mask
 
 
-WRITE_PATH = '/CDD-SELECTED-MASKS'
-ANNOTATION_CSV_FILE = '/original/Radiology_hand_drawn_segmentations_v2.csv'
+WRITE_PATH = '../CDD/original/CDD-CESM/CDD-CESM-MASKS'
+ANNOTATION_CSV_FILE = '../CDD/original/Radiology_hand_drawn_segmentations_v2.csv'
 
 df = pd.read_csv(ANNOTATION_CSV_FILE)
 try:
     os.makedirs(WRITE_PATH)
 except:
-    print("i already exists")
+    print(WRITE_PATH+  "already exists")
 
-imagesPath = "/Users/pablo/Desktop/nl2-project/CDD/original/Low energy images of CDD-CESM/"
+imagesPath = "../CDD/original/CDD-CESM/Low energy images of CDD-CESM/"
 
 entries = os.listdir(imagesPath)
 entries.sort()
