@@ -1217,32 +1217,32 @@ def CBISFullRoutine():
     dcmCalcTrainingFolderPath = "/Volumes/Extreme SSD//CBIS-Calc-Training/"
     dcmCalcTestingFolderPath = "/Volumes/Extreme SSD//CBIS-Calc-Testing/"
 
-    originalTrainingMassPreprocessedIMGFolderPath = "../CBIS-Original-Mass-Training-Preprocessed-IMG"
-    originalTrainingMassPreprocessedMSKFolderPath = "../CBIS-Original-Mass-Training-Preprocessed-MSK"
-    originalTrainingMassCSVPath = "../CBIS/mass_case_description_train_set.csv"
-    updatedTrainingMassCSVPath = "../CBIS/mass_case_description_train_set_UPDATED2.csv"
+    originalTrainingMassPreprocessedIMGFolderPath = "../CBIS/original-preprocessed/intermediate/CBIS-Original-Mass-Training-Preprocessed-IMG"
+    originalTrainingMassPreprocessedMSKFolderPath = "../CBIS/original-preprocessed/intermediate/CBIS-Original-Mass-Training-Preprocessed-MSK"
+    originalTrainingMassCSVPath = "../CBIS/csv/mass_case_description_train_set.csv"
+    updatedTrainingMassCSVPath = "../CBIS/csv/mass_case_description_train_set_UPDATED2.csv"
 
-    originalTestingMassPreprocessedIMGFolderPath = "../CBIS-Original-Mass-Testing-Preprocessed-IMG"
-    originalTestingMassPreprocessedMSKFolderPath = "../CBIS-Original-Mass-Testing-Preprocessed-MSK"
+    originalTestingMassPreprocessedIMGFolderPath = ".../CBIS/original-preprocessed/intermediate/CBIS-Original-Mass-Testing-Preprocessed-IMG"
+    originalTestingMassPreprocessedMSKFolderPath = "../CBIS/original-preprocessed/intermediate/CBIS-Original-Mass-Testing-Preprocessed-MSK"
 
-    originalTestingMassCSVPath = "../CBIS/mass_case_description_test_set.csv"
-    updatedTestingMassCSVPath = "../CBIS/mass_case_description_test_set_UPDATED2.csv"
+    originalTestingMassCSVPath = "../CBIS/csv/mass_case_description_test_set.csv"
+    updatedTestingMassCSVPath = "../CBIS/csv/mass_case_description_test_set_UPDATED2.csv"
 
     completePreprocessedMassIMGFolderPath = "../CBIS-Original-Mass-Preprocessed-Complete-IMG"
     completePreprocessedMassMSKFolderPath = "../CBIS-Original-Mass-Preprocessed-Complete-MSK"
 
-    originalTrainingCalcPreprocessedIMGFolderPath = "../CBIS/intermediate/CBIS-Original-Calc-Training-Preprocessed-IMG"
-    originalTrainingCalcPreprocessedMSKFolderPath = "../CBIS/intermediate/CBIS-Original-Calc-Training-Preprocessed-MSK"
-    originalTrainingCalcCSVPath = "../CBIS/calc_case_description_train_set.csv"
-    updatedTrainingCalcCSVPath = "../CBIS/calc_case_description_train_set_UPDATED.csv"
+    originalTrainingCalcPreprocessedIMGFolderPath = "..CBIS/original-preprocessed/intermediate/CBIS-Original-Calc-Training-Preprocessed-IMG"
+    originalTrainingCalcPreprocessedMSKFolderPath = "...CBIS/original-preprocessed/intermediate/CBIS-Original-Calc-Training-Preprocessed-MSK"
+    originalTrainingCalcCSVPath = "../CBIS/csv/calc_case_description_train_set.csv"
+    updatedTrainingCalcCSVPath = "../CBIS/csv/calc_case_description_train_set_UPDATED.csv"
 
-    originalTestingCalcPreprocessedIMGFolderPath = "../CBIS/intermediate/CBIS-Original-Calc-Testing-Preprocessed-IMG"
-    originalTestingCalcPreprocessedMSKFolderPath = "../CBIS/intermediate/CBIS-Original-Calc-Testing-Preprocessed-MSK"
-    originalTestingCalcCSVPath = "../CBIS/calc_case_description_test_set.csv"
-    updatedTestingCalcCSVPath = "../CBIS/calc_case_description_test_set_UPDATED.csv"
+    originalTestingCalcPreprocessedIMGFolderPath = "...CBIS/original-preprocessed/intermediate/CBIS-Original-Calc-Testing-Preprocessed-IMG"
+    originalTestingCalcPreprocessedMSKFolderPath = "..CBIS/original-preprocessed/intermediate/CBIS-Original-Calc-Testing-Preprocessed-MSK"
+    originalTestingCalcCSVPath = "../CBIS/csv/calc_case_description_test_set.csv"
+    updatedTestingCalcCSVPath = "../CBIS/csv/calc_case_description_test_set_UPDATED.csv"
 
-    completePreprocessedCalcIMGFolderPath = "../CBIS/CBIS-Original-Calc-Preprocessed-Complete-IMG"
-    completePreprocessedCalcMSKFolderPath = "../CBIS/CBIS-Original-Calc-Preprocessed-Complete-MSK"
+    completePreprocessedCalcIMGFolderPath = "..CBIS/original-preprocessed/CBIS-Original-Calc-Preprocessed-Complete-IMG"
+    completePreprocessedCalcMSKFolderPath = "...CBIS/original-preprocessed/CBIS-Original-Calc-Preprocessed-Complete-MSK"
 
     abnormality_col = "abnormality_id"
     extension = ".png"
@@ -1648,7 +1648,7 @@ def BCDRFullRoutine():
 
 if __name__ == '__main__':
     # CSAWFullRoutine()
-    # CBISFullRoutine()
+    CBISFullRoutine()
     # INBreastFullRoutine()
     # BCDRFullRoutine()
     pass
