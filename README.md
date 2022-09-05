@@ -1,16 +1,21 @@
 # Breast-Cancer-Segmentation-Datasets
 🩺 Curated collection of datasets for breast cancer segmentation
 
-- 📙 [Description](#-description)
+- 📙 [Motivation](#-Motivation)
 - 🗄️ [Datasets](#Datasets)
   - 🩻 [BCDR](#BCDR)
   - 🩻 [CBIS-DDSM](#CBIS-DDSM)
   - 🩻 [CSAW-S](#CSAW-S)
   - 🩻 [INbreast](#INbreast)
   - 🩻 [CDD-CESM](#CDD-CESM)
+
+# 📙 Motivation
+
+In this repository you can find several anonimized mammography datasets from various sources. The peculiarity of this collection of datasets is that for each of them a curated subset has been selected for precise automatic segmentation applications, such as training deep learning architectures. 
+
+The rationale behind this choice is that, while looking for publicy available data for [traninig an enhanced **U-NET**](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-RWNet), apart from the fact that most of the datasets available online have to be handleded ad hoc both from the file organization point of view and the file formats, I noticed that the majority of provided masks are very imprecise (due to the usage of automatic tools, like in the case of [CBIS-DDSM](#CBIS-DDSM)) or approximate (the masks are simple ovals covering the cancer mass, like in the case of [INbreast](#INBreast)). Such samples won't allow a proper training of a neural network for automatic segmentation, so a proper data cleaning is mandatory. In this repository you can find 5 datasets, whose details are described below. Each dataset's folder contains the 'original' folder (as downloaded from the source website), 'SELECTED' samples folders and one or more Python scripts for reorganizing original files' into a more usable structure. Note that these scripts have been already applied and the resulting folders are contined within the 'original' folder
   
-  
-# Datasets
+# 🗄️ Datasets
  ## BCDR
  First Iberian wide-ranging annotated [**BREAST CANCER DIGITAL REPOSITORY** (BCDR)](https://bcdr.eu). The BCDR is a compilation of Breast Cancer anonymized patients' 
  cases annotated by expert radiologists containing <ins>clinical data (detected anomalies, breast density, BIRADS classification, etc.), 
