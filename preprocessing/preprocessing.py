@@ -10,7 +10,7 @@ from skimage.exposure import equalize_adapthist
 
 from CBIS.refactorCBIS import updateCSV
 from CBIS import handle_multi_tumor
-from INbreast.refactor import removeBenignAcquisitions, loadInbreastMask
+from INbreast.refactorINbreast import removeBenignAcquisitions, loadInbreastMask
 
 from augmentations import pad, padInverted
 
@@ -1298,12 +1298,14 @@ def CBISFullRoutine():
 
 
 def CSAWFullRoutine():
-    originalCSAWImagesPath = "../CSAW/intermediate/CSAW-Original-IMG"
-    originalCSAWMasksPath = "../CSAW/intermediate/CSAW-Original-MSK"
-    mammGlandsMasksPath = "../CSAW/intermediate/CSAW-Original-Mammary-Gland"
+    originalCSAWImagesPath = "../CSAW/original/CSAW-Original-IMG"
+    originalCSAWMasksPath = "../CSAW/original/CSAW-Original-MSK"
+    mammGlandsMasksPath = "../CSAW/original/CSAW-Original-Mammary-Gland"
 
-    originalPreprocessedCSAWImagesPath = "../CSAW/CSAW-Original-Preprocessed-IMG"
-    originalPreprocessedCSAWMakskPath = "../CSAW/CSAW-Original-Preprocessed-MSK"
+    originalPreprocessedCSAWImagesPath = "../CSAW/original/CSAW-Original-Preprocessed-IMG"
+    originalPreprocessedCSAWMakskPath = "../CSAW/original/CSAW-Original-Preprocessed-MSK"
+
+
 
     CSAWPreprocessing(logger = None,
                       imagesPath = originalCSAWImagesPath,
@@ -1312,10 +1314,10 @@ def CSAWFullRoutine():
                       outputMasksPath = originalPreprocessedCSAWMakskPath,
                       mammGlandMasksPath = mammGlandsMasksPath)
 
-    CropAndSaveImagesRoutine(MassImagesPath = "../CSAW/CSAW-SELECTED-IMGS",
+    """CropAndSaveImagesRoutine(MassImagesPath = "../CSAW/CSAW-SELECTED-IMGS",
                              MassMasksPath = "../CSAW/CSAW-SELECTED-MASKS",
                              croppedMassImagesPath = "../CSAW/CSAW-Cropped-FINAL-IMG",
-                             croppedMassMasksPath = "../CSAW/CSAW-Cropped-FINAL-MSK")
+                             croppedMassMasksPath = "../CSAW/CSAW-Cropped-FINAL-MSK")"""
 
 
 def BCDRPreprocessing(imagesDirPath, masksDirPath, outputImagesPath, outputMasksPath):
@@ -1452,11 +1454,11 @@ def BCDRPreprocessing(imagesDirPath, masksDirPath, outputImagesPath, outputMasks
 
 
 def INBreastFullRoutine():
-    originalINBreastImagesPath = "../INbreast/AllDICOMs"
-    originalINBreastMasksPath = "../INbreast/AllXML"
-    INBreastCSVPath = "../INbreast/INbreast.csv"
-    completePreprocessedIMGFolderPath = "../INbreast/INBREAST-Original-Preprocessed-IMG"
-    completePreprocessedMSKFolderPath = "../INbreast/INBREAST-Original-Preprocessed-MSK"
+    originalINBreastImagesPath = "../INbreast/original/AllDICOMs"
+    originalINBreastMasksPath = "../INbreast/original/AllXML"
+    INBreastCSVPath = "../INbreast/original/INbreast.csv"
+    completePreprocessedIMGFolderPath = "../INbreast/original/INBREAST-Original-Preprocessed-IMG"
+    completePreprocessedMSKFolderPath = "../INbreast/original/INBREAST-Original-Preprocessed-MSK"
 
     INBreastPreprocessing(imagesDirPath = originalINBreastImagesPath,
                           masksDirPath = originalINBreastMasksPath,
@@ -1464,10 +1466,10 @@ def INBreastFullRoutine():
                           outputImagesPath = completePreprocessedIMGFolderPath,
                           outputMasksPath = completePreprocessedMSKFolderPath)
 
-    CropAndSaveImagesRoutine(MassImagesPath = "../INbreast/INBREAST-SELECTED-IMGS",
+    """CropAndSaveImagesRoutine(MassImagesPath = "../INbreast/INBREAST-SELECTED-IMGS",
                              MassMasksPath = "../INbreast/INBREAST-SELECTED-MSKS",
                              croppedMassImagesPath = "../INbreast/INBREAST-Cropped-IMG",
-                             croppedMassMasksPath = "../INbreast/INBREAST-Cropped-MSK")
+                             croppedMassMasksPath = "../INbreast/INBREAST-Cropped-MSK")"""
 
 
 # TODO Check this, should process directly xmls or have a preprocessing step (in INbreast module)
@@ -1526,6 +1528,7 @@ def INBreastPreprocessing(imagesDirPath, masksDirPath, csvPath, outputImagesPath
         ds = pydicom.dcmread(fullMammPath)
 
         fullMamm = ds.pixel_array
+        print(fullMammPath)
 
         # =========================
         # Preprocess Full Mammogram
