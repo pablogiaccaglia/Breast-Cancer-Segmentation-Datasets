@@ -406,12 +406,6 @@ def augmentDataset(images: list, masks: list, augmentingFactor: int) -> (list, l
     return augmented_test_images, augmented_test_masks
 
 
-def natural_sort(l):
-    convert = lambda text: int(text) if text.isdigit() else text.lower()
-    alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
-    return sorted(l, key = alphanum_key)
-
-
 def loadData(imagesPath: Union[str, list[str]], masksPath: Union[str, list[str]], mode: str,
              augmentationFactor = None, req: int = None):
     # ====================
@@ -812,52 +806,6 @@ def getDatasetForNet() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, 
                         testingMaskDir = testingMaskDir)
 
 
-def loadNumpyArrays(folderPath: str, arr) -> np.ndarray:
-    i = 0
-    for entry in os.scandir(folderPath):
-
-        l = np.load(entry)
-
-        if len(l.shape) == 2:
-            l = np.reshape(l, (256, 256, 1))
-
-        print(l.shape)
-        arr[i] = l
-        i = i + 1
-        break
-
-    return arr
-
-
-def getDatasetArraysForNet() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    trainingImgDir = "../CBIS/Dataset-split-arrays/Training-Final-IMG-Arrayss/"
-    trainingMaskDir = "../CBIS/Dataset-split-arrays/Training-Final-MSK-Arrays/"
-    validationImgDir = "../CBIS/Dataset-split-arrays/Validation-Final-IMG-Arrays"
-    validationMaskDir = "../CBIS/Dataset-split-arrays/Testing-Final-MSK-Arrays/"
-    testingImgDir = "../CBIS/Dataset-split-arrays/Testing-Final-IMG-Arrays/"
-    testingMaskDir = "../CBIS/Dataset-split-arrays/Testing-Final-MSK-Arrays/"
-
-    return loadNumpyArrays(folderPath = trainingImgDir, arr = np.ndarray((13027, 256, 256, 3), dtype = 'float32')), \
-           loadNumpyArrays(folderPath = trainingMaskDir, arr = np.ndarray((13027, 256, 256, 1), dtype = 'float32')), \
-           loadNumpyArrays(folderPath = validationImgDir,
-                           arr = np.ndarray((2605, 256, 256, 3), dtype = 'float32')), loadNumpyArrays(
-            folderPath = validationMaskDir,
-            arr = np.ndarray((2605, 256, 256, 1), dtype = 'float32')), \
-           loadNumpyArrays(folderPath = testingImgDir,
-                           arr = np.ndarray((1738, 256, 256, 3), dtype = 'float32')), loadNumpyArrays(
-            folderPath = testingMaskDir,
-            arr = np.ndarray((1738, 256, 256, 1), dtype = 'float32'))
-
-
-def Normalize(data, mean_data = None, std_data = None):
-    if not mean_data:
-        mean_data = np.mean(data)
-    if not std_data:
-        std_data = np.std(data)
-    norm_data = (data - mean_data) / std_data
-    return norm_data, mean_data, std_data
-
-
 def __saveDatasetArraysForNet(folderPath: str, suffix: str, data: np.ndarray):
     for i in range(len(data)):
         index = i + 1
@@ -939,15 +887,6 @@ def saveDatasetArraysForNet():
 
 
 if __name__ == '__main__':
-    # 12:23
-    # routineMakeFinalDataset()
+
+    routineMakeFinalDataset()
     saveDatasetArraysForNet()
-
-    # BCDR -> 485
-    # CBIS calc -> 1505
-    # CBIS mass -> 1592
-    # csaw -> 339
-    # inbreast -> 118
-    # total : 3.939
-
-    # INBREAST, CBIS CALC, BCDR, CSAW
