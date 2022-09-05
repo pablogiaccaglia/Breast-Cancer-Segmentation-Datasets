@@ -190,7 +190,7 @@ Image     |  Mask |  Image     |  Mask
 - **[Paper](https://www.nature.com/articles/sdata2017177)**
 - **[Dataset](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/tree/master/CBIS)**
 
-The dataset can be downloaded directly from the [project website](https://wiki.cancerimagingarchive.net/display/Public/CBIS-DDSM), but the directory structure is messy. Following the ideas here explained, script inside [<code>refactorCBIS.py</code>](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CBIS/refactorCBIS.py) reorganizes the dicom files in a tidy way. The resulting folders are available for download [here](https://1drv.ms/u/s!Ahq9yFCnfdZEkcEbVIZymYnKbHb4cA?e=dk4LJg)
+The dataset can be downloaded directly from the [project website](https://wiki.cancerimagingarchive.net/display/Public/CBIS-DDSM), but the directory structure is messy. Following the ideas [here](https://towardsdatascience.com/can-you-find-the-breast-tumours-part-1-of-3-1473ba685036) explained, script inside [<code>refactorCBIS.py</code>](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CBIS/refactorCBIS.py) reorganizes the dicom files in a tidy way. The resulting folders are available for download [here](https://1drv.ms/u/s!Ahq9yFCnfdZEkcEbVIZymYnKbHb4cA?e=dk4LJg)
 
 ### Folder structure
 ```
