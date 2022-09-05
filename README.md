@@ -186,24 +186,29 @@ Image     |  Mask |  Image     |  Mask
 
 ### Folder structure
 ```
-CDD
+CBIS 
 │ 
-├── original
-│     │
-│     │
-│     ├ CDD-CESM
-│     │     │
-│     │     ├ Low energy images of CDD-CES
-│     │     │
-│     │     └ Subtracted images of CDD-CESM
-│     │
-│     └ Radiology_hand_drawn_segmentations_v2.csv -> manual segmentation annotations are provided for the abnormal findings in each image
+├── CBIS-CALC-SELECTED-IMGS -> selected screenings
+│
+├── CBIS-CALC-SELECTED-MASKS-> selected masks
 │ 
-├── CDD-SELECTED-IMGS -> selected screenings
+├── CBIS-MASS-SELECTED-IMGS -> selected screenings
 │
-├── CDD-SELECTED-MASKS -> selected masks
+├── CBIS-MASS-SELECTED-MASKS-> selected masks
 │
-└── draw_segs.py -> script to draw segmentations from csv
+├── CBIS-Original-Calc-Preprocessed-Complete-IMG -> all calcification acquisitions preprocessed
+│
+├── CBIS-Original-Calc-Preprocessed-Complete-MSK -> all calcification acquisitions masks preprocessed
+│
+├── CBIS-Original-Mass-Preprocessed-Complete-IMG -> all mass acquisitions preprocessed
+│
+├── CBIS-Original-Mass-Preprocessed-Complete-MSK -> all mass acquisitions masks preprocessed
+│
+├── csv -> contains csvs about clinical data (detected anomalies, breast density, BIRADS, etc.), lesions outlines, and image-based features
+│
+├── handle_multi_tumor.py-> script to handle screening with multiple masks
+│
+└── refactorCBIS.py -> script to reorganize files in the original folder
 ```
   
   
