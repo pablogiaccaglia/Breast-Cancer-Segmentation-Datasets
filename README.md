@@ -13,7 +13,13 @@
 
 In this repository you can find several anonimized mammography datasets from various sources. The peculiarity of this collection of datasets is that for each of them a curated subset has been selected for precise automatic segmentation applications, such as training deep learning architectures. 
 
-The rationale behind this choice is that, while looking for publicy available data for [traninig an enhanced **U-NET**](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-RWNet), apart from the fact that most of the datasets available online have to be handleded ad hoc both from the file organization point of view and the file formats, I noticed that the majority of provided masks are very imprecise (due to the usage of automatic tools, like in the case of [CBIS-DDSM](#CBIS-DDSM)) or approximate (the masks are simple ovals covering the cancer mass, like in the case of [INbreast](#INBreast)). Such samples won't allow a proper training of a neural network for automatic segmentation, so a proper data cleaning is mandatory. In this repository you can find 5 datasets, whose details are described below. Each dataset's folder contains the 'original' folder (as downloaded from the source website), 'SELECTED' samples folders and one or more Python scripts for reorganizing original files' into a more usable structure. Note that these scripts have been already applied and the resulting folders are contined within the 'original' folder
+The rationale behind this choice is that, while looking for publicy available data for [traninig an enhanced **U-NET**](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-RWNet), apart from the fact that most of the datasets available online have to be handleded ad hoc both from the file organization point of view and the file formats, I noticed that the majority of provided masks are very imprecise (due to the usage of automatic tools, like in the case of [CBIS-DDSM](#CBIS-DDSM)) or approximate (the masks are simple ovals covering the cancer mass, like in the case of [INbreast](#INBreast)). 
+
+Such samples won't allow a proper training of a **neural network for automatic segmentation**, so a proper data cleaning is mandatory. In this repository you can find *5 datasets*, whose details are described below. 
+
+<ins>Each dataset's folder contains the **'original'** folder (as downloaded from the source website), '**SELECTED'** samples folders and one or more Python scripts for reorganizing original files' into a more usable structure and remove duplicated/unpaired samples. **Note that these scripts have been already applied and the resulting folders are contined within the 'original' folder**</ins>
+
+Preprocessing steps have been applied to each dataset, apart from **CDD-CESM**, to produce the samples contained in the *'preprocessed'* folders. Related code is contained inside [<code>preprocessing.py</code>](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/preprocessing/preprocessing.py). Finally suitable samples have been selected manually.
   
 # 🗄️ Datasets
  ## BCDR
@@ -112,7 +118,7 @@ INbreast
 │
 ├── INBREAST-SELECTED-MASKS -> selected masks
 │
-└── refactorINBbreast.py -> script to reorganize files inside 'original' folder
+└── refactorINBbreast.py -> contains methods for the preprocessing of INbreast data, which takes place in 'preprocessing.py'
 ```
   
   
@@ -183,6 +189,8 @@ Image     |  Mask |  Image     |  Mask
 - **[Project Website](https://wiki.cancerimagingarchive.net/display/Public/CBIS-DDSM)**
 - **[Paper](https://www.nature.com/articles/sdata2017177)**
 - **[Dataset](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/tree/master/CBIS)**
+
+The dataset can be downloaded directly from the [project website](https://wiki.cancerimagingarchive.net/display/Public/CBIS-DDSM), but the directory structure is messy. Following the ideas here explained, script inside [<code>refactorCBIS.py</code>](https://github.com/pablogiaccaglia/Breast-Cancer-Segmentation-Datasets/blob/master/CBIS/refactorCBIS.py) reorganizes the dicom files in a tidy way. The resulting folders are available for download [here](https://1drv.ms/u/s!Ahq9yFCnfdZEkcEbVIZymYnKbHb4cA?e=dk4LJg)
 
 ### Folder structure
 ```
